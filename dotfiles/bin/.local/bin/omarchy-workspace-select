@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Workspace selector: list active workspaces via walker dmenu, or type a name
+# to create and switch to a new named workspace.
+set -euo pipefail
+
+# Get workspace data from Hyprland
+workspaces_json=$(hyprctl workspaces -j)
+active_id=$(hyprctl activeworkspace -j | jq -r '.id')
+
+# Build menu lines: "ID: Name — Nw" (no window titles to avoid false filter matches)
+# Sort by workspace ID (numeric), skip special workspaces (negative IDs)
+menu_lines=()
+active_index=0
+index=0
+
+while IFS= read -r ws; do
+    ws_id=$(echo "$ws" | jq -r '.id')
+    ws_name=$(echo "$ws" | jq -r '.name')
+    ws_windows=$(echo "$ws" | jq -r '.windows')
+
+    # Skip special workspaces (negative IDs)
+    [[ "$ws_id" -lt 0 ]] && continue
+
+    # Format the display line
+    if [[ "$ws_name" == "$ws_id" ]]; then
+        display_name="$ws_id"
+    else
+        display_name="$ws_id: $ws_name"
+    fi
+
+    line="$display_name — ${ws_windows}w"
+
+    # Mark active workspace
+    if [[ "$ws_id" == "$active_id" ]]; then
+        line=" $line"
+        active_index=$index
+    else
+        line="  $line"
+    fi
+
+    menu_lines+=("$line")
+    index=$((index + 1))
+done < <(echo "$workspaces_json" | jq -c 'sort_by(.id) | .[]')
+
+# Join lines with newlines
+menu=$(printf '%s\n' "${menu_lines[@]}")
+
+# Launch walker dmenu
+selection=$(echo "$menu" | omarchy-launch-walker --dmenu \
+    --width 500 --minheight 1 --maxheight 400 \
+    -c "$active_index" \
+    -p "Workspace..." \
+) || exit 0
+
+# Empty selection means user cancelled
+[[ -z "$selection" ]] && exit 0
+
+# Check if the selection matches one of our menu lines (user picked from list)
+matched_id=""
+while IFS= read -r ws; do
+    ws_id=$(echo "$ws" | jq -r '.id')
+    ws_name=$(echo "$ws" | jq -r '.name')
+    [[ "$ws_id" -lt 0 ]] && continue
+
+    # Match against the display patterns we generated
+    if [[ "$selection" == *"$ws_id: $ws_name —"* ]] || [[ "$selection" == *"$ws_id —"* ]]; then
+        matched_id="$ws_id"
+        break
+    fi
+done < <(echo "$workspaces_json" | jq -c 'sort_by(.id) | .[]')
+
+if [[ -n "$matched_id" ]]; then
+    # Switch to existing workspace by ID
+    hyprctl dispatch workspace "$matched_id"
+else
+    # User typed a custom name — strip leading/trailing whitespace
+    selection=$(echo "$selection" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    # If the input is purely numeric, switch to that workspace number
+    if [[ "$selection" =~ ^[0-9]+$ ]]; then
+        hyprctl dispatch workspace "$selection"
+    else
+        # Create/switch to a named workspace
+        hyprctl dispatch workspace "name:$selection"
+    fi
+fi

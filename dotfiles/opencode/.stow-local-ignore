@@ -1,0 +1,7 @@
+# Ignore node_modules, lock files, and other non-config files
+node_modules
+bun\.lock
+package\.json
+package-lock\.json
+\.gitignore
+README\.md

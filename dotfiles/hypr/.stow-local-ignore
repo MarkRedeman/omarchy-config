@@ -1,0 +1,3 @@
+# Ignore shaders directory — managed by Omarchy/Aether via absolute symlinks
+# to /usr/share/aether/shaders/. Stow cannot handle absolute symlinks as sources.
+\.config/hypr/shaders

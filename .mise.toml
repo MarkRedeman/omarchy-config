@@ -1,0 +1,4 @@
+# Disable mise's Python so system tools (virt-install, etc.) use /usr/bin/python3
+# which has access to pacman-installed modules like python-gobject (gi)
+[settings]
+disable_tools = ["python"]

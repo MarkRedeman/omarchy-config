@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "omarchy": {
+      "source": "basecamp/omarchy",
+      "sourceType": "github",
+      "computedHash": "750c506f08990e212679884bbaa22cf09222e297e238e807c84070bf366ae3e7"
+    }
+  }
+}
