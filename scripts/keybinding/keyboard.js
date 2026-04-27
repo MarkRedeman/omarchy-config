@@ -255,7 +255,7 @@ function renderKeyboard() {
 
         row.forEach(keyLabel => {
             const keyEl = document.createElement('div');
-            keyEl.className = 'key flex-1 p-2 text-center border rounded bg-white hover:bg-gray-100';
+            keyEl.className = 'key flex-1 border border-[#353543] bg-[#0d0d14]/90 p-2 text-center text-sm text-[#f0dbcf] transition hover:bg-[#151523]';
             keyEl.dataset.key = keyLabel;
             keyEl.textContent = getDisplayLabel(keyLabel);
 
@@ -318,12 +318,12 @@ function updateUI() {
 
 function updateKeyboardHighlight() {
     document.querySelectorAll('.key').forEach(keyEl => {
-        keyEl.classList.remove('bg-yellow-200', 'bg-yellow-100');
+        keyEl.classList.remove('bg-[#b4b691]', 'text-[#07070B]', 'bg-[#353543]');
 
         const keyToken = normalizeKeyToken(keyEl.dataset.key);
         const isPressed = keyToken ? activeKeys.has(keyToken) : false;
         if (isPressed) {
-            keyEl.classList.add('bg-yellow-200');
+            keyEl.classList.add('bg-[#b4b691]', 'text-[#07070B]');
         }
 
         // Check if this key appears in any currently visible binding
@@ -336,8 +336,8 @@ function updateKeyboardHighlight() {
             return visualToken ? bindingKeys.has(visualToken) : false;
         });
 
-        if (keyInFilteredBindings) {
-            keyEl.classList.add('bg-yellow-100');
+        if (keyInFilteredBindings && !isPressed) {
+            keyEl.classList.add('bg-[#353543]');
         }
     });
 }
@@ -359,18 +359,18 @@ function renderBindings() {
 
     bindingsListEl.innerHTML = '';
     if (filtered.length === 0) {
-        bindingsListEl.innerHTML = '<p class="text-sm text-gray-500">No matching keybindings</p>';
+        bindingsListEl.innerHTML = '<p class="px-3 py-3 text-sm text-[#9a9dbc]">No matching keybindings</p>';
         return;
     }
 
     filtered.forEach(b => {
         const div = document.createElement('div');
-        div.className = 'binding-item flex items-center gap-3 px-2 py-1.5 border-b border-gray-200 last:border-b-0 text-sm';
+        div.className = 'binding-item flex items-center gap-3 border-b border-[#2a2a35] px-2 py-1.5 text-sm last:border-b-0 hover:bg-[#12121a]';
         const combo = formatBindingCombo(b);
         div.innerHTML = `
-            <span class="combo font-mono text-xs text-gray-600 min-w-[12rem]">${combo}</span>
-            <span class="description text-gray-800 flex-1 truncate">${b.description || ''}</span>
-            <small class="dispatcher text-xs text-gray-500 shrink-0">${b.dispatcher || ''}</small>
+            <span class="combo min-w-[12rem] font-mono text-xs text-[#d7a88d]">${combo}</span>
+            <span class="description flex-1 truncate text-[#f0dbcf]">${b.description || ''}</span>
+            <small class="dispatcher shrink-0 text-xs uppercase tracking-wide text-[#9a9dbc]">${b.dispatcher || ''}</small>
         `;
         bindingsListEl.appendChild(div);
     });
