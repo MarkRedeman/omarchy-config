@@ -1,0 +1,8 @@
+[tools]
+go = "latest"
+julia = "1.12.6"
+node = "lts"
+usage = "latest"
+
+[settings]
+disable_tools = ["python"]
