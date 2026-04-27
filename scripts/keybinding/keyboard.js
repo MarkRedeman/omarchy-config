@@ -51,6 +51,10 @@ let activeKeys = new Set(); // Currently pressed/toggled keys (normalized)
 let hoveredKeyboardKeys = new Set(); // Temporary keys from hovering keyboard tiles
 let hoveredBindingKeys = new Set(); // Temporary keys from hovering binding rows
 let searchQuery = "";
+const HOVER_CLEAR_DELAY_MS = 120;
+
+let keyboardHoverClearTimers = new Map();
+let bindingHoverClearTimer = null;
 
 // DOM elements
 let keyboardEl, bindingsListEl, searchInputEl, clearButtonEl;
@@ -269,6 +273,11 @@ function renderKeyboard() {
             keyEl.addEventListener('mouseenter', () => {
                 const token = normalizeKeyToken(keyLabel);
                 if (!token) return;
+                const pendingTimer = keyboardHoverClearTimers.get(token);
+                if (pendingTimer) {
+                    clearTimeout(pendingTimer);
+                    keyboardHoverClearTimers.delete(token);
+                }
                 hoveredKeyboardKeys.add(token);
                 updateUI();
             });
@@ -276,8 +285,12 @@ function renderKeyboard() {
             keyEl.addEventListener('mouseleave', () => {
                 const token = normalizeKeyToken(keyLabel);
                 if (!token) return;
-                hoveredKeyboardKeys.delete(token);
-                updateUI();
+                const timer = setTimeout(() => {
+                    hoveredKeyboardKeys.delete(token);
+                    keyboardHoverClearTimers.delete(token);
+                    updateUI();
+                }, HOVER_CLEAR_DELAY_MS);
+                keyboardHoverClearTimers.set(token, timer);
             });
 
             // Store aliases for matching
@@ -320,6 +333,17 @@ function getDisplayLabel(keyLabel) {
     return map[keyLabel] || keyLabel;
 }
 
+function getKeyActiveClasses(keyToken) {
+    const modifierStyles = {
+        SUPER: ['bg-[#DD5C5C]', 'text-[#07070B]'],
+        ALT: ['bg-[#D7A88D]', 'text-[#07070B]'],
+        SHIFT: ['bg-[#c09dc8]', 'text-[#07070B]'],
+        CTRL: ['bg-[#9cab8d]', 'text-[#07070B]']
+    };
+
+    return modifierStyles[keyToken] || ['bg-[#b4b691]', 'text-[#07070B]'];
+}
+
 function getKeyModifiers(keyLabel) {
     // Return which modifier categories this key belongs to
     const key = normalizeKeyToken(KEY_ALIASES[keyLabel] || keyLabel);
@@ -345,14 +369,23 @@ function updateClearButtonState() {
 
 function updateKeyboardHighlight() {
     document.querySelectorAll('.key').forEach(keyEl => {
-        keyEl.classList.remove('bg-[#b4b691]', 'text-[#07070B]', 'text-[#f0dbcf]', 'bg-[#353543]');
+        keyEl.classList.remove(
+            'bg-[#b4b691]',
+            'bg-[#DD5C5C]',
+            'bg-[#D7A88D]',
+            'bg-[#c09dc8]',
+            'bg-[#9cab8d]',
+            'bg-[#353543]',
+            'text-[#07070B]',
+            'text-[#f0dbcf]'
+        );
 
         const keyToken = normalizeKeyToken(keyEl.dataset.key);
         const isPressedOrHovered = keyToken
             ? (activeKeys.has(keyToken) || hoveredKeyboardKeys.has(keyToken) || hoveredBindingKeys.has(keyToken))
             : false;
         if (isPressedOrHovered) {
-            keyEl.classList.add('bg-[#b4b691]', 'text-[#07070B]');
+            keyEl.classList.add(...getKeyActiveClasses(keyToken));
         }
 
         // Check if this key appears in any currently visible binding
@@ -398,13 +431,20 @@ function renderBindings() {
         const combo = formatBindingCombo(b);
 
         div.addEventListener('mouseenter', () => {
+            if (bindingHoverClearTimer) {
+                clearTimeout(bindingHoverClearTimer);
+                bindingHoverClearTimer = null;
+            }
             hoveredBindingKeys = getBindingKeySet(b);
             updateKeyboardHighlight();
         });
 
         div.addEventListener('mouseleave', () => {
-            hoveredBindingKeys.clear();
-            updateKeyboardHighlight();
+            bindingHoverClearTimer = setTimeout(() => {
+                hoveredBindingKeys.clear();
+                bindingHoverClearTimer = null;
+                updateKeyboardHighlight();
+            }, HOVER_CLEAR_DELAY_MS);
         });
 
         div.innerHTML = `
