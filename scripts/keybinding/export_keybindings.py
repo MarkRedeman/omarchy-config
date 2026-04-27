@@ -12,14 +12,32 @@ Output: scripts/keybinding/keybindings.json
 import json
 import subprocess
 import sys
-import os
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 
 def get_runtime_bindings():
     """Try to get bindings from hyprctl."""
+    modmask_map = {
+        1: "SHIFT",
+        4: "CTRL",
+        8: "ALT",
+        64: "SUPER",
+    }
+
+    def mods_from_modmask(modmask):
+        mods = []
+        try:
+            mask = int(modmask)
+        except (TypeError, ValueError):
+            return mods
+
+        for bit, name in modmask_map.items():
+            if mask & bit:
+                mods.append(name)
+        return mods
+
     try:
         result = subprocess.run(
             ["hyprctl", "binds", "-j"], capture_output=True, text=True, check=True
@@ -37,7 +55,13 @@ def get_runtime_bindings():
                 for part in mod_str.split("+"):
                     if part:
                         mods.append(part)
+            elif "modmask" in b:
+                mods = mods_from_modmask(b.get("modmask", 0))
+
             key = b.get("key", "")
+            if not key and b.get("keycode"):
+                key = f"code:{b.get('keycode')}"
+
             dispatcher = b.get("dispatcher", "")
             description = b.get("description", "")
             # Build combo string
@@ -79,7 +103,7 @@ def parse_binding_line(line):
         return None
     # First part: modifiers (could be empty string)
     mods_str = parts[0]
-    mods = [m for m in mods_str.split("+") if m] if mods_str else []
+    mods = [m for m in re.split(r"[+\s]+", mods_str) if m] if mods_str else []
     # Second part: key
     key = parts[1]
     # Third part: description (may have commas? we assume not, as description is before dispatcher)
@@ -141,7 +165,7 @@ def main():
 
     # Build output structure
     output = {
-        "generatedAt": datetime.utcnow().isoformat() + "Z",
+        "generatedAt": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "sourceMode": source_mode,
         "totalBindings": len(bindings),
         "bindings": bindings,

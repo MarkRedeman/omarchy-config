@@ -47,7 +47,7 @@ const DISPLAY_ALIASES = {
 
 // State
 let bindings = [];
-let activeMods = new Set(); // Currently pressed modifier keys (SUPER, SHIFT, etc.)
+let activeKeys = new Set(); // Currently pressed/toggled keys (normalized)
 let searchQuery = "";
 
 // DOM elements
@@ -78,12 +78,15 @@ async function init() {
 
 async function loadBindings() {
     try {
-        const response = fetch('keybindings.json');
+        const response = await fetch('keybindings.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         bindings = data.bindings || [];
         console.log(`Loaded ${bindings.length} keybindings`);
-    } catch (err) {
-        console.error("Failed to load keybindings.json", err);
+    } catch (e) {
+        console.error("Failed to load keybindings.json", e);
         bindings = [];
     }
 }
@@ -99,13 +102,12 @@ function setupEventListeners() {
         if (!keyEl) return;
         const keyName = keyEl.dataset.key;
         if (!keyName) return;
-        // Toggle modifier state for visualization
-        const mod = keyToModifier(keyName);
-        if (mod) {
-            if (activeMods.has(mod)) {
-                activeMods.delete(mod);
+        const token = normalizeKeyToken(keyName);
+        if (token) {
+            if (activeKeys.has(token)) {
+                activeKeys.delete(token);
             } else {
-                activeMods.add(mod);
+                activeKeys.add(token);
             }
             updateUI();
         }
@@ -119,7 +121,7 @@ function setupEventListeners() {
 
     // Clear button
     clearButtonEl.addEventListener('click', () => {
-        activeMods.clear();
+        activeKeys.clear();
         searchInputEl.value = '';
         searchQuery = '';
         updateUI();
@@ -127,14 +129,14 @@ function setupEventListeners() {
 }
 
 function handleKeyDown(e) {
-    const mod = keyToModifier(e.key);
-    if (mod) {
-        activeMods.add(mod);
+    const token = normalizeKeyToken(e.key);
+    if (token) {
+        activeKeys.add(token);
         updateUI();
     }
-    // Also handle special keys like Escape for clearing?
+
     if (e.key === 'Escape') {
-        activeMods.clear();
+        activeKeys.clear();
         searchInputEl.value = '';
         searchQuery = '';
         updateUI();
@@ -142,25 +144,105 @@ function handleKeyDown(e) {
 }
 
 function handleKeyUp(e) {
-    const mod = keyToModifier(e.key);
-    if (mod) {
-        activeMods.delete(mod);
+    const token = normalizeKeyToken(e.key);
+    if (token) {
+        activeKeys.delete(token);
         updateUI();
     }
 }
 
-function keyToModifier(key) {
-    // Map browser key names to our modifier names
-    const map = {
+function normalizeKeyToken(key) {
+    if (!key) return null;
+
+    const raw = String(key).trim();
+    if (!raw) return null;
+
+    const aliasMap = {
         'Shift': 'SHIFT',
+        'ShiftLeft': 'SHIFT',
+        'ShiftRight': 'SHIFT',
         'Control': 'CTRL',
+        'Ctrl': 'CTRL',
+        'CtrlLeft': 'CTRL',
+        'CtrlRight': 'CTRL',
         'Alt': 'ALT',
-        'Meta': 'SUPER', // Cmd on Mac, Win on Windows/Linux
-        'OS': 'SUPER',   // Firefox
+        'AltLeft': 'ALT',
+        'AltRight': 'ALT',
+        'Meta': 'SUPER',
+        'OS': 'SUPER',
+        'Super': 'SUPER',
         'Win': 'SUPER',
-        'Super': 'SUPER'
+        'WinLeft': 'SUPER',
+        'WinRight': 'SUPER',
+        'Escape': 'ESC',
+        'Esc': 'ESC',
+        'Enter': 'ENTER',
+        'Backspace': 'BACKSPACE',
+        'Tab': 'TAB',
+        'Space': 'SPACE',
+        ' ': 'SPACE',
+        'ArrowUp': 'UP',
+        'ArrowDown': 'DOWN',
+        'ArrowLeft': 'LEFT',
+        'ArrowRight': 'RIGHT'
     };
-    return map[key] || null;
+
+    if (aliasMap[raw]) return aliasMap[raw];
+
+    if (raw.length === 1) {
+        return raw.toUpperCase();
+    }
+
+    return raw.toUpperCase();
+}
+
+function getBindingKeySet(binding) {
+    const keys = new Set();
+    (binding.mods || []).forEach(mod => {
+        const token = normalizeKeyToken(mod);
+        if (token) keys.add(token);
+    });
+
+    const keyToken = normalizeKeyToken(binding.key);
+    if (keyToken) keys.add(keyToken);
+
+    return keys;
+}
+
+function matchesActiveKeys(binding) {
+    if (activeKeys.size === 0) return true;
+
+    const bindingKeys = getBindingKeySet(binding);
+    return [...activeKeys].every(key => bindingKeys.has(key));
+}
+
+function formatKeyForCombo(key) {
+    const token = normalizeKeyToken(key);
+    const display = {
+        SUPER: 'SUPER',
+        SHIFT: 'SHIFT',
+        CTRL: 'CTRL',
+        ALT: 'ALT',
+        ENTER: 'ENTER',
+        RETURN: 'RETURN',
+        ESC: 'ESC',
+        TAB: 'TAB',
+        SPACE: 'SPACE',
+        LEFT: 'LEFT',
+        RIGHT: 'RIGHT',
+        UP: 'UP',
+        DOWN: 'DOWN',
+        BACKSPACE: 'BACKSPACE'
+    };
+
+    if (!token) return '';
+    return display[token] || token;
+}
+
+function formatBindingCombo(binding) {
+    const mods = (binding.mods || []).map(formatKeyForCombo).filter(Boolean);
+    const key = formatKeyForCombo(binding.key);
+    return [...mods, key].filter(Boolean).join('+') || '(no combo)';
 }
 
 function renderKeyboard() {
@@ -169,12 +251,11 @@ function renderKeyboard() {
 
     KEYBOARD_LAYOUT.forEach(row => {
         const rowDiv = document.createElement('div');
-        rowDiv.style.display = 'flex';
-        rowDiv.style.gap = '4px';
+        rowDiv.className = 'flex gap-1 mb-2';
 
         row.forEach(keyLabel => {
             const keyEl = document.createElement('div');
-            keyEl.className = 'key';
+            keyEl.className = 'key flex-1 p-2 text-center border rounded bg-white hover:bg-gray-100';
             keyEl.dataset.key = keyLabel;
             keyEl.textContent = getDisplayLabel(keyLabel);
 
@@ -220,7 +301,7 @@ function getDisplayLabel(keyLabel) {
 
 function getKeyModifiers(keyLabel) {
     // Return which modifier categories this key belongs to
-    const key = KEY_ALIASES[keyLabel] || keyLabel;
+    const key = normalizeKeyToken(KEY_ALIASES[keyLabel] || keyLabel);
     switch (key) {
         case 'SUPER': return ['SUPER'];
         case 'ALT': return ['ALT'];
@@ -237,51 +318,39 @@ function updateUI() {
 
 function updateKeyboardHighlight() {
     document.querySelectorAll('.key').forEach(keyEl => {
-        keyEl.classList.remove('pressed', 'filter-match');
+        keyEl.classList.remove('bg-yellow-200', 'bg-yellow-100');
 
-        const mods = keyEl.dataset.mods ? keyEl.dataset.mods.split(' ') : [];
-        const isPressed = mods.some(m => activeMods.has(m));
+        const keyToken = normalizeKeyToken(keyEl.dataset.key);
+        const isPressed = keyToken ? activeKeys.has(keyToken) : false;
         if (isPressed) {
-            keyEl.classList.add('pressed');
+            keyEl.classList.add('bg-yellow-200');
         }
 
         // Check if this key appears in any currently visible binding
         const keyInFilteredBindings = bindings.some(b => {
-            // Check if binding matches current mods (all active mods must be in binding)
-            const bindingMods = new Set(b.mods);
-            const modsMatch = [...activeMods].every(mod => bindingMods.has(mod));
-            if (!modsMatch) return false;
+            if (!matchesActiveKeys(b)) return false;
 
             // Check if this binding's key matches this visual key
-            const bindingKey = b.key;
-            const displayKey = getDisplayLabel(keyEl.dataset.key);
-            // Simplified: just check if the key label matches
-            return bindingKey === keyEl.dataset.key ||
-                   (bindingKey === 'SPACE' && keyEl.dataset.key === 'Space') ||
-                   (bindingKey === 'ENTER' && keyEl.dataset.key === 'Enter') ||
-                   (bindingKey === 'ESC' && keyEl.dataset.key === 'Esc') ||
-                   (bindingKey === 'BACKSPACE' && keyEl.dataset.key === 'Backspace') ||
-                   (bindingKey === 'TAB' && keyEl.dataset.key === 'Tab');
+            const bindingKeys = getBindingKeySet(b);
+            const visualToken = normalizeKeyToken(keyEl.dataset.key);
+            return visualToken ? bindingKeys.has(visualToken) : false;
         });
 
         if (keyInFilteredBindings) {
-            keyEl.classList.add('filter-match');
+            keyEl.classList.add('bg-yellow-100');
         }
     });
 }
 
 function renderBindings() {
     const filtered = bindings.filter(binding => {
-        // 1. Check modifier requirements
-        const bindingMods = new Set(binding.mods);
-        const modsMatch = [...activeMods].every(mod => bindingMods.has(mod));
-        if (!modsMatch) return false;
+        if (!matchesActiveKeys(binding)) return false;
 
-        // 2. Check search query
+        // Check search query
         if (searchQuery && 
-            !binding.description.toLowerCase().includes(searchQuery) &&
-            !binding.dispatcher.toLowerCase().includes(searchQuery) &&
-            !binding.combo.toLowerCase().includes(searchQuery)) {
+            !(binding.description || '').toLowerCase().includes(searchQuery) &&
+            !(binding.dispatcher || '').toLowerCase().includes(searchQuery) &&
+            !(binding.combo || '').toLowerCase().includes(searchQuery)) {
             return false;
         }
 
@@ -290,23 +359,24 @@ function renderBindings() {
 
     bindingsListEl.innerHTML = '';
     if (filtered.length === 0) {
-        bindingsListEl.innerHTML = '<p class="empty">No matching keybindings</p>';
+        bindingsListEl.innerHTML = '<p class="text-sm text-gray-500">No matching keybindings</p>';
         return;
     }
 
     filtered.forEach(b => {
         const div = document.createElement('div');
-        div.className = 'binding-item';
+        div.className = 'binding-item flex items-center gap-3 px-2 py-1.5 border-b border-gray-200 last:border-b-0 text-sm';
+        const combo = formatBindingCombo(b);
         div.innerHTML = `
-            <span class="combo">${b.combo || '(no combo)'}</span>
-            <span class="description">${b.description}</span>
-            <small class="dispatcher">${b.dispatcher}</small>
+            <span class="combo font-mono text-xs text-gray-600 min-w-[12rem]">${combo}</span>
+            <span class="description text-gray-800 flex-1 truncate">${b.description || ''}</span>
+            <small class="dispatcher text-xs text-gray-500 shrink-0">${b.dispatcher || ''}</small>
         `;
         bindingsListEl.appendChild(div);
     });
 
     // Update header count
-    const bindingsHeader = document.querySelector('#bindings h2');
+    const bindingsHeader = document.getElementById('bindings-header');
     if (bindingsHeader) {
         bindingsHeader.textContent = `Keybindings (${filtered.length}/${bindings.length})`;
     }

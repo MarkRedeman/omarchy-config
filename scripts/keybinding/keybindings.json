@@ -1,13 +1,15 @@
 {
-  "generatedAt": "2026-04-27T19:33:21.296259Z",
+  "generatedAt": "2026-04-27T20:40:25.499970Z",
   "sourceMode": "runtime",
   "totalBindings": 162,
   "bindings": [
     {
       "id": "0::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "RETURN",
-      "combo": "RETURN",
+      "combo": "SUPER+RETURN",
       "description": "Terminal",
       "dispatcher": "exec",
       "args": [],
@@ -17,9 +19,12 @@
     },
     {
       "id": "1::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "RETURN",
-      "combo": "RETURN",
+      "combo": "ALT+SUPER+RETURN",
       "description": "Tmux",
       "dispatcher": "exec",
       "args": [],
@@ -29,9 +34,11 @@
     },
     {
       "id": "2::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "D",
-      "combo": "D",
+      "combo": "SUPER+D",
       "description": "Launch apps",
       "dispatcher": "exec",
       "args": [],
@@ -41,9 +48,12 @@
     },
     {
       "id": "3::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "B",
-      "combo": "B",
+      "combo": "ALT+SUPER+B",
       "description": "Browser",
       "dispatcher": "exec",
       "args": [],
@@ -53,9 +63,13 @@
     },
     {
       "id": "4::exec",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT",
+        "SUPER"
+      ],
       "key": "B",
-      "combo": "B",
+      "combo": "SHIFT+ALT+SUPER+B",
       "description": "Browser (private)",
       "dispatcher": "exec",
       "args": [],
@@ -65,9 +79,12 @@
     },
     {
       "id": "5::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "F",
-      "combo": "F",
+      "combo": "ALT+SUPER+F",
       "description": "File manager",
       "dispatcher": "exec",
       "args": [],
@@ -77,9 +94,13 @@
     },
     {
       "id": "6::exec",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT",
+        "SUPER"
+      ],
       "key": "F",
-      "combo": "F",
+      "combo": "SHIFT+ALT+SUPER+F",
       "description": "File manager (cwd)",
       "dispatcher": "exec",
       "args": [],
@@ -89,9 +110,12 @@
     },
     {
       "id": "7::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "E",
-      "combo": "E",
+      "combo": "ALT+SUPER+E",
       "description": "Editor",
       "dispatcher": "exec",
       "args": [],
@@ -101,9 +125,12 @@
     },
     {
       "id": "8::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "M",
-      "combo": "M",
+      "combo": "ALT+SUPER+M",
       "description": "Music",
       "dispatcher": "exec",
       "args": [],
@@ -113,9 +140,12 @@
     },
     {
       "id": "9::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "D",
-      "combo": "D",
+      "combo": "ALT+SUPER+D",
       "description": "Docker",
       "dispatcher": "exec",
       "args": [],
@@ -125,9 +155,12 @@
     },
     {
       "id": "10::killactive",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "Q",
-      "combo": "Q",
+      "combo": "SHIFT+SUPER+Q",
       "description": "Close window",
       "dispatcher": "killactive",
       "args": [],
@@ -137,9 +170,11 @@
     },
     {
       "id": "11::hy3:movefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "H",
-      "combo": "H",
+      "combo": "SUPER+H",
       "description": "Move focus left",
       "dispatcher": "hy3:movefocus",
       "args": [],
@@ -149,9 +184,11 @@
     },
     {
       "id": "12::hy3:movefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "J",
-      "combo": "J",
+      "combo": "SUPER+J",
       "description": "Move focus down",
       "dispatcher": "hy3:movefocus",
       "args": [],
@@ -161,9 +198,11 @@
     },
     {
       "id": "13::hy3:movefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "K",
-      "combo": "K",
+      "combo": "SUPER+K",
       "description": "Move focus up",
       "dispatcher": "hy3:movefocus",
       "args": [],
@@ -173,9 +212,11 @@
     },
     {
       "id": "14::hy3:movefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "L",
-      "combo": "L",
+      "combo": "SUPER+L",
       "description": "Move focus right",
       "dispatcher": "hy3:movefocus",
       "args": [],
@@ -185,9 +226,11 @@
     },
     {
       "id": "15::hy3:movefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "LEFT",
-      "combo": "LEFT",
+      "combo": "SUPER+LEFT",
       "description": "Move focus left",
       "dispatcher": "hy3:movefocus",
       "args": [],
@@ -197,9 +240,11 @@
     },
     {
       "id": "16::hy3:movefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "RIGHT",
-      "combo": "RIGHT",
+      "combo": "SUPER+RIGHT",
       "description": "Move focus right",
       "dispatcher": "hy3:movefocus",
       "args": [],
@@ -209,9 +254,11 @@
     },
     {
       "id": "17::hy3:movefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "UP",
-      "combo": "UP",
+      "combo": "SUPER+UP",
       "description": "Move focus up",
       "dispatcher": "hy3:movefocus",
       "args": [],
@@ -221,9 +268,11 @@
     },
     {
       "id": "18::hy3:movefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "DOWN",
-      "combo": "DOWN",
+      "combo": "SUPER+DOWN",
       "description": "Move focus down",
       "dispatcher": "hy3:movefocus",
       "args": [],
@@ -233,9 +282,12 @@
     },
     {
       "id": "19::hy3:movewindow",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "H",
-      "combo": "H",
+      "combo": "SHIFT+SUPER+H",
       "description": "Move window left",
       "dispatcher": "hy3:movewindow",
       "args": [],
@@ -245,9 +297,12 @@
     },
     {
       "id": "20::hy3:movewindow",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "J",
-      "combo": "J",
+      "combo": "SHIFT+SUPER+J",
       "description": "Move window down",
       "dispatcher": "hy3:movewindow",
       "args": [],
@@ -257,9 +312,12 @@
     },
     {
       "id": "21::hy3:movewindow",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "K",
-      "combo": "K",
+      "combo": "SHIFT+SUPER+K",
       "description": "Move window up",
       "dispatcher": "hy3:movewindow",
       "args": [],
@@ -269,9 +327,12 @@
     },
     {
       "id": "22::hy3:movewindow",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "L",
-      "combo": "L",
+      "combo": "SHIFT+SUPER+L",
       "description": "Move window right",
       "dispatcher": "hy3:movewindow",
       "args": [],
@@ -281,9 +342,12 @@
     },
     {
       "id": "23::hy3:movewindow",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "LEFT",
-      "combo": "LEFT",
+      "combo": "SHIFT+SUPER+LEFT",
       "description": "Move window left",
       "dispatcher": "hy3:movewindow",
       "args": [],
@@ -293,9 +357,12 @@
     },
     {
       "id": "24::hy3:movewindow",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "RIGHT",
-      "combo": "RIGHT",
+      "combo": "SHIFT+SUPER+RIGHT",
       "description": "Move window right",
       "dispatcher": "hy3:movewindow",
       "args": [],
@@ -305,9 +372,12 @@
     },
     {
       "id": "25::hy3:movewindow",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "UP",
-      "combo": "UP",
+      "combo": "SHIFT+SUPER+UP",
       "description": "Move window up",
       "dispatcher": "hy3:movewindow",
       "args": [],
@@ -317,9 +387,12 @@
     },
     {
       "id": "26::hy3:movewindow",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "DOWN",
-      "combo": "DOWN",
+      "combo": "SHIFT+SUPER+DOWN",
       "description": "Move window down",
       "dispatcher": "hy3:movewindow",
       "args": [],
@@ -329,9 +402,11 @@
     },
     {
       "id": "27::fullscreen",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "F",
-      "combo": "F",
+      "combo": "SUPER+F",
       "description": "Full screen",
       "dispatcher": "fullscreen",
       "args": [],
@@ -341,9 +416,12 @@
     },
     {
       "id": "28::hy3:makegroup",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "V",
-      "combo": "V",
+      "combo": "SHIFT+SUPER+V",
       "description": "Toggle split direction",
       "dispatcher": "hy3:makegroup",
       "args": [],
@@ -353,9 +431,11 @@
     },
     {
       "id": "29::hy3:changegroup",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "E",
-      "combo": "E",
+      "combo": "SUPER+E",
       "description": "Toggle split layout",
       "dispatcher": "hy3:changegroup",
       "args": [],
@@ -365,9 +445,11 @@
     },
     {
       "id": "30::hy3:changefocus",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "A",
-      "combo": "A",
+      "combo": "SUPER+A",
       "description": "Focus parent",
       "dispatcher": "hy3:changefocus",
       "args": [],
@@ -377,9 +459,12 @@
     },
     {
       "id": "31::hy3:changefocus",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "A",
-      "combo": "A",
+      "combo": "SHIFT+SUPER+A",
       "description": "Focus child",
       "dispatcher": "hy3:changefocus",
       "args": [],
@@ -389,9 +474,11 @@
     },
     {
       "id": "32::hy3:focustab",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "TAB",
-      "combo": "TAB",
+      "combo": "SUPER+TAB",
       "description": "Next tab",
       "dispatcher": "hy3:focustab",
       "args": [],
@@ -401,9 +488,12 @@
     },
     {
       "id": "33::hy3:focustab",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "TAB",
-      "combo": "TAB",
+      "combo": "SHIFT+SUPER+TAB",
       "description": "Previous tab",
       "dispatcher": "hy3:focustab",
       "args": [],
@@ -413,9 +503,12 @@
     },
     {
       "id": "34::togglefloating",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "SPACE",
-      "combo": "SPACE",
+      "combo": "SHIFT+SUPER+SPACE",
       "description": "Toggle floating",
       "dispatcher": "togglefloating",
       "args": [],
@@ -425,9 +518,11 @@
     },
     {
       "id": "35::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "SPACE",
-      "combo": "SPACE",
+      "combo": "SUPER+SPACE",
       "description": "Focus toggle",
       "dispatcher": "exec",
       "args": [],
@@ -437,9 +532,11 @@
     },
     {
       "id": "36::hy3:makegroup",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "W",
-      "combo": "W",
+      "combo": "SUPER+W",
       "description": "Toggle tab group",
       "dispatcher": "hy3:makegroup",
       "args": [],
@@ -449,9 +546,12 @@
     },
     {
       "id": "37::fullscreenstate",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "F",
-      "combo": "F",
+      "combo": "CTRL+SUPER+F",
       "description": "Tiled full screen",
       "dispatcher": "fullscreenstate",
       "args": [],
@@ -461,9 +561,11 @@
     },
     {
       "id": "38::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "O",
-      "combo": "O",
+      "combo": "SUPER+O",
       "description": "Pop window out (float & pin)",
       "dispatcher": "exec",
       "args": [],
@@ -473,9 +575,11 @@
     },
     {
       "id": "39::cyclenext",
-      "mods": [],
+      "mods": [
+        "ALT"
+      ],
       "key": "TAB",
-      "combo": "TAB",
+      "combo": "ALT+TAB",
       "description": "Cycle to next window",
       "dispatcher": "cyclenext",
       "args": [],
@@ -485,9 +589,12 @@
     },
     {
       "id": "40::cyclenext",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT"
+      ],
       "key": "TAB",
-      "combo": "TAB",
+      "combo": "SHIFT+ALT+TAB",
       "description": "Cycle to prev window",
       "dispatcher": "cyclenext",
       "args": [],
@@ -497,9 +604,11 @@
     },
     {
       "id": "41::bringactivetotop",
-      "mods": [],
+      "mods": [
+        "ALT"
+      ],
       "key": "TAB",
-      "combo": "TAB",
+      "combo": "ALT+TAB",
       "description": "Reveal active window on top",
       "dispatcher": "bringactivetotop",
       "args": [],
@@ -509,9 +618,12 @@
     },
     {
       "id": "42::bringactivetotop",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT"
+      ],
       "key": "TAB",
-      "combo": "TAB",
+      "combo": "SHIFT+ALT+TAB",
       "description": "Reveal active window on top",
       "dispatcher": "bringactivetotop",
       "args": [],
@@ -521,9 +633,11 @@
     },
     {
       "id": "43::mouse",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "mouse:272",
-      "combo": "mouse:272",
+      "combo": "SUPER+mouse:272",
       "description": "Move window",
       "dispatcher": "mouse",
       "args": [],
@@ -533,9 +647,11 @@
     },
     {
       "id": "44::mouse",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "mouse:273",
-      "combo": "mouse:273",
+      "combo": "SUPER+mouse:273",
       "description": "Resize window",
       "dispatcher": "mouse",
       "args": [],
@@ -545,9 +661,11 @@
     },
     {
       "id": "45::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "S",
-      "combo": "S",
+      "combo": "SUPER+S",
       "description": "Workspace selector",
       "dispatcher": "exec",
       "args": [],
@@ -557,9 +675,11 @@
     },
     {
       "id": "46::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "1",
-      "combo": "1",
+      "combo": "SUPER+1",
       "description": "Workspace 1",
       "dispatcher": "workspace",
       "args": [],
@@ -569,9 +689,11 @@
     },
     {
       "id": "47::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "2",
-      "combo": "2",
+      "combo": "SUPER+2",
       "description": "Workspace 2",
       "dispatcher": "workspace",
       "args": [],
@@ -581,9 +703,11 @@
     },
     {
       "id": "48::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "3",
-      "combo": "3",
+      "combo": "SUPER+3",
       "description": "Workspace 3",
       "dispatcher": "workspace",
       "args": [],
@@ -593,9 +717,11 @@
     },
     {
       "id": "49::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "4",
-      "combo": "4",
+      "combo": "SUPER+4",
       "description": "Workspace 4",
       "dispatcher": "workspace",
       "args": [],
@@ -605,9 +731,11 @@
     },
     {
       "id": "50::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "5",
-      "combo": "5",
+      "combo": "SUPER+5",
       "description": "Workspace 5",
       "dispatcher": "workspace",
       "args": [],
@@ -617,9 +745,11 @@
     },
     {
       "id": "51::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "6",
-      "combo": "6",
+      "combo": "SUPER+6",
       "description": "Workspace 6",
       "dispatcher": "workspace",
       "args": [],
@@ -629,9 +759,11 @@
     },
     {
       "id": "52::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "7",
-      "combo": "7",
+      "combo": "SUPER+7",
       "description": "Workspace 7",
       "dispatcher": "workspace",
       "args": [],
@@ -641,9 +773,11 @@
     },
     {
       "id": "53::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "8",
-      "combo": "8",
+      "combo": "SUPER+8",
       "description": "Workspace 8",
       "dispatcher": "workspace",
       "args": [],
@@ -653,9 +787,11 @@
     },
     {
       "id": "54::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "9",
-      "combo": "9",
+      "combo": "SUPER+9",
       "description": "Workspace 9",
       "dispatcher": "workspace",
       "args": [],
@@ -665,9 +801,11 @@
     },
     {
       "id": "55::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "0",
-      "combo": "0",
+      "combo": "SUPER+0",
       "description": "Workspace 10",
       "dispatcher": "workspace",
       "args": [],
@@ -677,9 +815,12 @@
     },
     {
       "id": "56::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "1",
-      "combo": "1",
+      "combo": "SHIFT+SUPER+1",
       "description": "Move to workspace 1",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -689,9 +830,12 @@
     },
     {
       "id": "57::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "2",
-      "combo": "2",
+      "combo": "SHIFT+SUPER+2",
       "description": "Move to workspace 2",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -701,9 +845,12 @@
     },
     {
       "id": "58::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "3",
-      "combo": "3",
+      "combo": "SHIFT+SUPER+3",
       "description": "Move to workspace 3",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -713,9 +860,12 @@
     },
     {
       "id": "59::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "4",
-      "combo": "4",
+      "combo": "SHIFT+SUPER+4",
       "description": "Move to workspace 4",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -725,9 +875,12 @@
     },
     {
       "id": "60::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "5",
-      "combo": "5",
+      "combo": "SHIFT+SUPER+5",
       "description": "Move to workspace 5",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -737,9 +890,12 @@
     },
     {
       "id": "61::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "6",
-      "combo": "6",
+      "combo": "SHIFT+SUPER+6",
       "description": "Move to workspace 6",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -749,9 +905,12 @@
     },
     {
       "id": "62::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "7",
-      "combo": "7",
+      "combo": "SHIFT+SUPER+7",
       "description": "Move to workspace 7",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -761,9 +920,12 @@
     },
     {
       "id": "63::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "8",
-      "combo": "8",
+      "combo": "SHIFT+SUPER+8",
       "description": "Move to workspace 8",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -773,9 +935,12 @@
     },
     {
       "id": "64::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "9",
-      "combo": "9",
+      "combo": "SHIFT+SUPER+9",
       "description": "Move to workspace 9",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -785,9 +950,12 @@
     },
     {
       "id": "65::movetoworkspacesilent",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "0",
-      "combo": "0",
+      "combo": "SHIFT+SUPER+0",
       "description": "Move to workspace 10",
       "dispatcher": "movetoworkspacesilent",
       "args": [],
@@ -797,9 +965,11 @@
     },
     {
       "id": "66::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "Z",
-      "combo": "Z",
+      "combo": "SUPER+Z",
       "description": "Former workspace",
       "dispatcher": "workspace",
       "args": [],
@@ -809,9 +979,12 @@
     },
     {
       "id": "67::movetoworkspace",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "Z",
-      "combo": "Z",
+      "combo": "SHIFT+SUPER+Z",
       "description": "Move to former workspace",
       "dispatcher": "movetoworkspace",
       "args": [],
@@ -821,9 +994,11 @@
     },
     {
       "id": "68::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "N",
-      "combo": "N",
+      "combo": "SUPER+N",
       "description": "Next workspace",
       "dispatcher": "workspace",
       "args": [],
@@ -833,9 +1008,11 @@
     },
     {
       "id": "69::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "P",
-      "combo": "P",
+      "combo": "SUPER+P",
       "description": "Previous workspace",
       "dispatcher": "workspace",
       "args": [],
@@ -845,9 +1022,12 @@
     },
     {
       "id": "70::movetoworkspace",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "N",
-      "combo": "N",
+      "combo": "SHIFT+SUPER+N",
       "description": "Move to next workspace",
       "dispatcher": "movetoworkspace",
       "args": [],
@@ -857,9 +1037,12 @@
     },
     {
       "id": "71::movetoworkspace",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "P",
-      "combo": "P",
+      "combo": "SHIFT+SUPER+P",
       "description": "Move to prev workspace",
       "dispatcher": "movetoworkspace",
       "args": [],
@@ -869,9 +1052,11 @@
     },
     {
       "id": "72::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "mouse_down",
-      "combo": "mouse_down",
+      "combo": "SUPER+mouse_down",
       "description": "Scroll workspace forward",
       "dispatcher": "workspace",
       "args": [],
@@ -881,9 +1066,11 @@
     },
     {
       "id": "73::workspace",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "mouse_up",
-      "combo": "mouse_up",
+      "combo": "SUPER+mouse_up",
       "description": "Scroll workspace backward",
       "dispatcher": "workspace",
       "args": [],
@@ -893,9 +1080,13 @@
     },
     {
       "id": "74::movecurrentworkspacetomonitor",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT",
+        "SUPER"
+      ],
       "key": "LEFT",
-      "combo": "LEFT",
+      "combo": "SHIFT+ALT+SUPER+LEFT",
       "description": "Move workspace to left monitor",
       "dispatcher": "movecurrentworkspacetomonitor",
       "args": [],
@@ -905,9 +1096,13 @@
     },
     {
       "id": "75::movecurrentworkspacetomonitor",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT",
+        "SUPER"
+      ],
       "key": "RIGHT",
-      "combo": "RIGHT",
+      "combo": "SHIFT+ALT+SUPER+RIGHT",
       "description": "Move workspace to right monitor",
       "dispatcher": "movecurrentworkspacetomonitor",
       "args": [],
@@ -917,9 +1112,13 @@
     },
     {
       "id": "76::movecurrentworkspacetomonitor",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT",
+        "SUPER"
+      ],
       "key": "UP",
-      "combo": "UP",
+      "combo": "SHIFT+ALT+SUPER+UP",
       "description": "Move workspace to up monitor",
       "dispatcher": "movecurrentworkspacetomonitor",
       "args": [],
@@ -929,9 +1128,13 @@
     },
     {
       "id": "77::movecurrentworkspacetomonitor",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT",
+        "SUPER"
+      ],
       "key": "DOWN",
-      "combo": "DOWN",
+      "combo": "SHIFT+ALT+SUPER+DOWN",
       "description": "Move workspace to down monitor",
       "dispatcher": "movecurrentworkspacetomonitor",
       "args": [],
@@ -941,9 +1144,13 @@
     },
     {
       "id": "78::movecurrentworkspacetomonitor",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "CTRL",
+        "SUPER"
+      ],
       "key": "H",
-      "combo": "H",
+      "combo": "SHIFT+CTRL+SUPER+H",
       "description": "Move workspace to left monitor",
       "dispatcher": "movecurrentworkspacetomonitor",
       "args": [],
@@ -953,9 +1160,13 @@
     },
     {
       "id": "79::movecurrentworkspacetomonitor",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "CTRL",
+        "SUPER"
+      ],
       "key": "J",
-      "combo": "J",
+      "combo": "SHIFT+CTRL+SUPER+J",
       "description": "Move workspace to down monitor",
       "dispatcher": "movecurrentworkspacetomonitor",
       "args": [],
@@ -965,9 +1176,13 @@
     },
     {
       "id": "80::movecurrentworkspacetomonitor",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "CTRL",
+        "SUPER"
+      ],
       "key": "K",
-      "combo": "K",
+      "combo": "SHIFT+CTRL+SUPER+K",
       "description": "Move workspace to up monitor",
       "dispatcher": "movecurrentworkspacetomonitor",
       "args": [],
@@ -977,9 +1192,13 @@
     },
     {
       "id": "81::movecurrentworkspacetomonitor",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "CTRL",
+        "SUPER"
+      ],
       "key": "L",
-      "combo": "L",
+      "combo": "SHIFT+CTRL+SUPER+L",
       "description": "Move workspace to right monitor",
       "dispatcher": "movecurrentworkspacetomonitor",
       "args": [],
@@ -989,9 +1208,11 @@
     },
     {
       "id": "82::submap",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "R",
-      "combo": "R",
+      "combo": "SUPER+R",
       "description": "Resize mode",
       "dispatcher": "submap",
       "args": [],
@@ -1097,9 +1318,11 @@
     },
     {
       "id": "91::resizeactive",
-      "mods": [],
+      "mods": [
+        "SHIFT"
+      ],
       "key": "H",
-      "combo": "H",
+      "combo": "SHIFT+H",
       "description": "Shrink width (large)",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1109,9 +1332,11 @@
     },
     {
       "id": "92::resizeactive",
-      "mods": [],
+      "mods": [
+        "SHIFT"
+      ],
       "key": "J",
-      "combo": "J",
+      "combo": "SHIFT+J",
       "description": "Grow height (large)",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1121,9 +1346,11 @@
     },
     {
       "id": "93::resizeactive",
-      "mods": [],
+      "mods": [
+        "SHIFT"
+      ],
       "key": "K",
-      "combo": "K",
+      "combo": "SHIFT+K",
       "description": "Shrink height (large)",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1133,9 +1360,11 @@
     },
     {
       "id": "94::resizeactive",
-      "mods": [],
+      "mods": [
+        "SHIFT"
+      ],
       "key": "L",
-      "combo": "L",
+      "combo": "SHIFT+L",
       "description": "Grow width (large)",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1145,9 +1374,11 @@
     },
     {
       "id": "95::resizeactive",
-      "mods": [],
+      "mods": [
+        "SHIFT"
+      ],
       "key": "LEFT",
-      "combo": "LEFT",
+      "combo": "SHIFT+LEFT",
       "description": "Shrink width (large)",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1157,9 +1388,11 @@
     },
     {
       "id": "96::resizeactive",
-      "mods": [],
+      "mods": [
+        "SHIFT"
+      ],
       "key": "DOWN",
-      "combo": "DOWN",
+      "combo": "SHIFT+DOWN",
       "description": "Grow height (large)",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1169,9 +1402,11 @@
     },
     {
       "id": "97::resizeactive",
-      "mods": [],
+      "mods": [
+        "SHIFT"
+      ],
       "key": "UP",
-      "combo": "UP",
+      "combo": "SHIFT+UP",
       "description": "Shrink height (large)",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1181,9 +1416,11 @@
     },
     {
       "id": "98::resizeactive",
-      "mods": [],
+      "mods": [
+        "SHIFT"
+      ],
       "key": "RIGHT",
-      "combo": "RIGHT",
+      "combo": "SHIFT+RIGHT",
       "description": "Grow width (large)",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1217,9 +1454,11 @@
     },
     {
       "id": "101::resizeactive",
-      "mods": [],
-      "key": "",
-      "combo": "",
+      "mods": [
+        "SUPER"
+      ],
+      "key": "code:20",
+      "combo": "SUPER+code:20",
       "description": "Expand window left",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1229,9 +1468,11 @@
     },
     {
       "id": "102::resizeactive",
-      "mods": [],
-      "key": "",
-      "combo": "",
+      "mods": [
+        "SUPER"
+      ],
+      "key": "code:21",
+      "combo": "SUPER+code:21",
       "description": "Shrink window left",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1241,9 +1482,12 @@
     },
     {
       "id": "103::resizeactive",
-      "mods": [],
-      "key": "",
-      "combo": "",
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
+      "key": "code:20",
+      "combo": "SHIFT+SUPER+code:20",
       "description": "Shrink window up",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1253,9 +1497,12 @@
     },
     {
       "id": "104::resizeactive",
-      "mods": [],
-      "key": "",
-      "combo": "",
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
+      "key": "code:21",
+      "combo": "SHIFT+SUPER+code:21",
       "description": "Expand window down",
       "dispatcher": "resizeactive",
       "args": [],
@@ -1265,9 +1512,11 @@
     },
     {
       "id": "105::sendshortcut",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "C",
-      "combo": "C",
+      "combo": "SUPER+C",
       "description": "Universal copy",
       "dispatcher": "sendshortcut",
       "args": [],
@@ -1277,9 +1526,11 @@
     },
     {
       "id": "106::sendshortcut",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "V",
-      "combo": "V",
+      "combo": "SUPER+V",
       "description": "Universal paste",
       "dispatcher": "sendshortcut",
       "args": [],
@@ -1289,9 +1540,11 @@
     },
     {
       "id": "107::sendshortcut",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "X",
-      "combo": "X",
+      "combo": "SUPER+X",
       "description": "Universal cut",
       "dispatcher": "sendshortcut",
       "args": [],
@@ -1301,9 +1554,12 @@
     },
     {
       "id": "108::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "C",
-      "combo": "C",
+      "combo": "ALT+SUPER+C",
       "description": "Clipboard manager",
       "dispatcher": "exec",
       "args": [],
@@ -1313,9 +1569,12 @@
     },
     {
       "id": "109::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "L",
-      "combo": "L",
+      "combo": "CTRL+SUPER+L",
       "description": "Lock",
       "dispatcher": "exec",
       "args": [],
@@ -1325,9 +1584,12 @@
     },
     {
       "id": "110::exec",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "C",
-      "combo": "C",
+      "combo": "SHIFT+SUPER+C",
       "description": "Reload config",
       "dispatcher": "exec",
       "args": [],
@@ -1337,9 +1599,11 @@
     },
     {
       "id": "111::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "ESCAPE",
-      "combo": "ESCAPE",
+      "combo": "SUPER+ESCAPE",
       "description": "System menu",
       "dispatcher": "exec",
       "args": [],
@@ -1361,9 +1625,12 @@
     },
     {
       "id": "113::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "E",
-      "combo": "E",
+      "combo": "CTRL+SUPER+E",
       "description": "Emoji picker",
       "dispatcher": "exec",
       "args": [],
@@ -1373,9 +1640,12 @@
     },
     {
       "id": "114::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "C",
-      "combo": "C",
+      "combo": "CTRL+SUPER+C",
       "description": "Capture menu",
       "dispatcher": "exec",
       "args": [],
@@ -1385,9 +1655,12 @@
     },
     {
       "id": "115::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "O",
-      "combo": "O",
+      "combo": "CTRL+SUPER+O",
       "description": "Toggle menu",
       "dispatcher": "exec",
       "args": [],
@@ -1397,9 +1670,12 @@
     },
     {
       "id": "116::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "SPACE",
-      "combo": "SPACE",
+      "combo": "ALT+SUPER+SPACE",
       "description": "Omarchy menu",
       "dispatcher": "exec",
       "args": [],
@@ -1421,9 +1697,12 @@
     },
     {
       "id": "118::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "SPACE",
-      "combo": "SPACE",
+      "combo": "CTRL+SUPER+SPACE",
       "description": "Theme background menu",
       "dispatcher": "exec",
       "args": [],
@@ -1433,9 +1712,13 @@
     },
     {
       "id": "119::exec",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "CTRL",
+        "SUPER"
+      ],
       "key": "SPACE",
-      "combo": "SPACE",
+      "combo": "SHIFT+CTRL+SUPER+SPACE",
       "description": "Theme menu",
       "dispatcher": "exec",
       "args": [],
@@ -1445,9 +1728,11 @@
     },
     {
       "id": "120::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "COMMA",
-      "combo": "COMMA",
+      "combo": "SUPER+COMMA",
       "description": "Dismiss last notification",
       "dispatcher": "exec",
       "args": [],
@@ -1457,9 +1742,12 @@
     },
     {
       "id": "121::exec",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "SUPER"
+      ],
       "key": "COMMA",
-      "combo": "COMMA",
+      "combo": "SHIFT+SUPER+COMMA",
       "description": "Dismiss all notifications",
       "dispatcher": "exec",
       "args": [],
@@ -1469,9 +1757,12 @@
     },
     {
       "id": "122::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "COMMA",
-      "combo": "COMMA",
+      "combo": "CTRL+SUPER+COMMA",
       "description": "Toggle silencing notifications",
       "dispatcher": "exec",
       "args": [],
@@ -1481,9 +1772,12 @@
     },
     {
       "id": "123::exec",
-      "mods": [],
+      "mods": [
+        "ALT",
+        "SUPER"
+      ],
       "key": "COMMA",
-      "combo": "COMMA",
+      "combo": "ALT+SUPER+COMMA",
       "description": "Invoke last notification",
       "dispatcher": "exec",
       "args": [],
@@ -1493,9 +1787,13 @@
     },
     {
       "id": "124::exec",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "ALT",
+        "SUPER"
+      ],
       "key": "COMMA",
-      "combo": "COMMA",
+      "combo": "SHIFT+ALT+SUPER+COMMA",
       "description": "Restore last notification",
       "dispatcher": "exec",
       "args": [],
@@ -1505,9 +1803,12 @@
     },
     {
       "id": "125::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "I",
-      "combo": "I",
+      "combo": "CTRL+SUPER+I",
       "description": "Toggle locking on idle",
       "dispatcher": "exec",
       "args": [],
@@ -1517,9 +1818,12 @@
     },
     {
       "id": "126::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "N",
-      "combo": "N",
+      "combo": "CTRL+SUPER+N",
       "description": "Toggle nightlight",
       "dispatcher": "exec",
       "args": [],
@@ -1541,9 +1845,11 @@
     },
     {
       "id": "128::exec",
-      "mods": [],
+      "mods": [
+        "ALT"
+      ],
       "key": "PRINT",
-      "combo": "PRINT",
+      "combo": "ALT+PRINT",
       "description": "Screen recording",
       "dispatcher": "exec",
       "args": [],
@@ -1553,9 +1859,11 @@
     },
     {
       "id": "129::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "PRINT",
-      "combo": "PRINT",
+      "combo": "SUPER+PRINT",
       "description": "Color picker",
       "dispatcher": "exec",
       "args": [],
@@ -1565,9 +1873,12 @@
     },
     {
       "id": "130::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "S",
-      "combo": "S",
+      "combo": "CTRL+SUPER+S",
       "description": "Share",
       "dispatcher": "exec",
       "args": [],
@@ -1577,9 +1888,13 @@
     },
     {
       "id": "131::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "ALT",
+        "SUPER"
+      ],
       "key": "T",
-      "combo": "T",
+      "combo": "CTRL+ALT+SUPER+T",
       "description": "Show time",
       "dispatcher": "exec",
       "args": [],
@@ -1589,9 +1904,13 @@
     },
     {
       "id": "132::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "ALT",
+        "SUPER"
+      ],
       "key": "B",
-      "combo": "B",
+      "combo": "CTRL+ALT+SUPER+B",
       "description": "Show battery remaining",
       "dispatcher": "exec",
       "args": [],
@@ -1601,9 +1920,12 @@
     },
     {
       "id": "133::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "A",
-      "combo": "A",
+      "combo": "CTRL+SUPER+A",
       "description": "Audio controls",
       "dispatcher": "exec",
       "args": [],
@@ -1613,9 +1935,12 @@
     },
     {
       "id": "134::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "B",
-      "combo": "B",
+      "combo": "CTRL+SUPER+B",
       "description": "Bluetooth controls",
       "dispatcher": "exec",
       "args": [],
@@ -1625,9 +1950,12 @@
     },
     {
       "id": "135::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "W",
-      "combo": "W",
+      "combo": "CTRL+SUPER+W",
       "description": "Wifi controls",
       "dispatcher": "exec",
       "args": [],
@@ -1637,9 +1965,12 @@
     },
     {
       "id": "136::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "T",
-      "combo": "T",
+      "combo": "CTRL+SUPER+T",
       "description": "Activity",
       "dispatcher": "exec",
       "args": [],
@@ -1649,9 +1980,12 @@
     },
     {
       "id": "137::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "X",
-      "combo": "X",
+      "combo": "CTRL+SUPER+X",
       "description": "Toggle dictation",
       "dispatcher": "exec",
       "args": [],
@@ -1661,9 +1995,12 @@
     },
     {
       "id": "138::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "SUPER"
+      ],
       "key": "Z",
-      "combo": "Z",
+      "combo": "CTRL+SUPER+Z",
       "description": "Zoom in",
       "dispatcher": "exec",
       "args": [],
@@ -1673,9 +2010,13 @@
     },
     {
       "id": "139::exec",
-      "mods": [],
+      "mods": [
+        "CTRL",
+        "ALT",
+        "SUPER"
+      ],
       "key": "Z",
-      "combo": "Z",
+      "combo": "CTRL+ALT+SUPER+Z",
       "description": "Reset zoom",
       "dispatcher": "exec",
       "args": [],
@@ -1793,9 +2134,11 @@
     },
     {
       "id": "149::exec",
-      "mods": [],
+      "mods": [
+        "ALT"
+      ],
       "key": "XF86AudioRaiseVolume",
-      "combo": "XF86AudioRaiseVolume",
+      "combo": "ALT+XF86AudioRaiseVolume",
       "description": "Volume up precise",
       "dispatcher": "exec",
       "args": [],
@@ -1805,9 +2148,11 @@
     },
     {
       "id": "150::exec",
-      "mods": [],
+      "mods": [
+        "ALT"
+      ],
       "key": "XF86AudioLowerVolume",
-      "combo": "XF86AudioLowerVolume",
+      "combo": "ALT+XF86AudioLowerVolume",
       "description": "Volume down precise",
       "dispatcher": "exec",
       "args": [],
@@ -1817,9 +2162,11 @@
     },
     {
       "id": "151::exec",
-      "mods": [],
+      "mods": [
+        "ALT"
+      ],
       "key": "XF86MonBrightnessUp",
-      "combo": "XF86MonBrightnessUp",
+      "combo": "ALT+XF86MonBrightnessUp",
       "description": "Brightness up precise",
       "dispatcher": "exec",
       "args": [],
@@ -1829,9 +2176,11 @@
     },
     {
       "id": "152::exec",
-      "mods": [],
+      "mods": [
+        "ALT"
+      ],
       "key": "XF86MonBrightnessDown",
-      "combo": "XF86MonBrightnessDown",
+      "combo": "ALT+XF86MonBrightnessDown",
       "description": "Brightness down precise",
       "dispatcher": "exec",
       "args": [],
@@ -1889,9 +2238,11 @@
     },
     {
       "id": "157::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "XF86AudioMute",
-      "combo": "XF86AudioMute",
+      "combo": "SUPER+XF86AudioMute",
       "description": "Switch audio output",
       "dispatcher": "exec",
       "args": [],
@@ -1901,9 +2252,11 @@
     },
     {
       "id": "158::exec",
-      "mods": [],
+      "mods": [
+        "CTRL"
+      ],
       "key": "F1",
-      "combo": "F1",
+      "combo": "CTRL+F1",
       "description": "Apple Display brightness down",
       "dispatcher": "exec",
       "args": [],
@@ -1913,9 +2266,11 @@
     },
     {
       "id": "159::exec",
-      "mods": [],
+      "mods": [
+        "CTRL"
+      ],
       "key": "F2",
-      "combo": "F2",
+      "combo": "CTRL+F2",
       "description": "Apple Display brightness up",
       "dispatcher": "exec",
       "args": [],
@@ -1925,9 +2280,12 @@
     },
     {
       "id": "160::exec",
-      "mods": [],
+      "mods": [
+        "SHIFT",
+        "CTRL"
+      ],
       "key": "F2",
-      "combo": "F2",
+      "combo": "SHIFT+CTRL+F2",
       "description": "Apple Display full brightness",
       "dispatcher": "exec",
       "args": [],
@@ -1937,9 +2295,11 @@
     },
     {
       "id": "161::exec",
-      "mods": [],
+      "mods": [
+        "SUPER"
+      ],
       "key": "Slash",
-      "combo": "Slash",
+      "combo": "SUPER+Slash",
       "description": "Cycle monitor scaling",
       "dispatcher": "exec",
       "args": [],
