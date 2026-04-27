@@ -255,7 +255,7 @@ function renderKeyboard() {
 
         row.forEach(keyLabel => {
             const keyEl = document.createElement('div');
-            keyEl.className = 'key flex-1 border border-[#353543] bg-[#0d0d14]/90 p-2 text-center text-sm text-[#f0dbcf] transition hover:bg-[#151523]';
+            keyEl.className = 'key flex-1 cursor-pointer select-none border border-[#353543] bg-[#0d0d14]/90 p-2 text-center text-sm text-[#f0dbcf] transition hover:bg-[#151523]';
             keyEl.dataset.key = keyLabel;
             keyEl.textContent = getDisplayLabel(keyLabel);
 
@@ -312,8 +312,14 @@ function getKeyModifiers(keyLabel) {
 }
 
 function updateUI() {
+    updateClearButtonState();
     updateKeyboardHighlight();
     renderBindings();
+}
+
+function updateClearButtonState() {
+    if (!clearButtonEl) return;
+    clearButtonEl.classList.toggle('is-active', activeKeys.size > 0 || searchQuery.length > 0);
 }
 
 function updateKeyboardHighlight() {
