@@ -262,11 +262,11 @@ function renderKeyboard() {
 
     KEYBOARD_LAYOUT.forEach(row => {
         const rowDiv = document.createElement('div');
-        rowDiv.className = 'flex gap-1 mb-2';
+        rowDiv.className = 'mb-1 flex min-w-[400px] gap-0.5 min-[600px]:mb-1.5 min-[600px]:gap-1 sm:mb-2';
 
         row.forEach(keyLabel => {
             const keyEl = document.createElement('div');
-            keyEl.className = 'key flex-1 cursor-pointer select-none border border-[#353543] bg-[#0d0d14]/90 p-2 text-center text-sm text-[#f0dbcf] transition';
+            keyEl.className = 'key box-border flex-1 cursor-pointer select-none border border-[#353543] bg-[#0d0d14]/90 px-0.5 py-0.5 text-center text-[8px] leading-[1.05] text-[#f0dbcf] transition-colors duration-150 min-[600px]:px-1 min-[600px]:py-1 min-[600px]:text-[10px] min-[600px]:leading-tight sm:px-1 sm:py-1 sm:text-[10px] md:px-1.5 md:py-1.5 md:text-xs lg:px-2 lg:py-2 lg:text-sm';
             keyEl.dataset.key = keyLabel;
             keyEl.textContent = getDisplayLabel(keyLabel);
 
