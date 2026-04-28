@@ -8,6 +8,7 @@
   "modules-center": ["custom/nightlight", "clock", "hyprland/submap", "custom/update", "custom/voxtype", "custom/screenrecording-indicator", "custom/idle-indicator", "custom/touchpad-indicator", "custom/notification-silencing-indicator"],
   "modules-right": [
     "group/tray-expander",
+    "custom/tailscale",
     "network",
     "pulseaudio",
     "battery"
@@ -161,6 +162,20 @@
     "signal": 11,
     "return-type": "json",
     "interval": 10
+  },
+  "custom/tailscale": {
+    "exec": "$HOME/.config/waybar/indicators/tailscale.sh --status",
+    "on-click": "$HOME/.config/waybar/indicators/tailscale.sh --toggle",
+    "exec-on-event": true,
+    "format": "{icon}",
+    "format-icons": {
+      "connected": "󰩟",
+      "stopped": "󰖪",
+      "connecting": "󰖩",
+      "disconnecting": "󰖩"
+    },
+    "return-type": "json",
+    "interval": 5
   },
   "tray": {
     "icon-size": 12,

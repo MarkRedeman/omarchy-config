@@ -92,6 +92,14 @@ tooltip {
   padding-bottom: 1px;
 }
 
+#custom-tailscale {
+  min-width: 12px;
+  margin-left: 6px;
+  margin-right: 9px;
+  font-size: 12px;
+  padding-bottom: 0;
+}
+
 #custom-screenrecording-indicator.active {
   color: #a55555;
 }
@@ -102,6 +110,26 @@ tooltip {
 
 #custom-nightlight.inactive {
   opacity: 0.65;
+}
+
+#custom-tailscale.connected {
+  color: #9cab8d;
+}
+
+#custom-tailscale.stopped {
+  opacity: 0.65;
+}
+
+#custom-tailscale.connecting,
+#custom-tailscale.disconnecting {
+  color: #d7a88d;
+  animation: tailscale-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes tailscale-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.55; }
+  100% { opacity: 1; }
 }
 
 #custom-voxtype {
