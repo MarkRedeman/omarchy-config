@@ -19,6 +19,27 @@
   margin-right: 8px;
 }
 
+#custom-omarchy,
+#clock,
+#custom-update,
+#submap,
+#custom-voxtype,
+#custom-screenrecording-indicator,
+#custom-idle-indicator,
+#custom-touchpad-indicator,
+#custom-nightlight,
+#custom-notification-silencing-indicator,
+#custom-tailscale,
+#custom-expand-icon,
+#tray,
+#network,
+#pulseaudio,
+#battery,
+#cpu,
+#bluetooth {
+  padding: 0 3px;
+}
+
 #workspaces button {
   all: initial;
   padding: 0 6px;
@@ -33,29 +54,15 @@
   font-weight: bold;
 }
 
-#cpu,
-#battery,
+#network,
 #pulseaudio,
+#battery,
+#cpu,
+#bluetooth,
 #custom-omarchy,
-#custom-update {
+#custom-update,
+#custom-tailscale {
   min-width: 12px;
-  margin: 0 7.5px;
-}
-
-#tray {
-  margin-right: 16px;
-}
-
-#bluetooth {
-  margin-right: 17px;
-}
-
-#network {
-  margin-right: 13px;
-}
-
-#custom-expand-icon {
-  margin-right: 18px;
 }
 
 tooltip {
@@ -66,38 +73,26 @@ tooltip {
   font-size: 10px;
 }
 
-#clock {
-  margin-left: 5px;
-}
-
 .hidden {
   opacity: 0;
 }
 
 #submap {
   color: #a55555;
-  margin-left: 5px;
   font-size: 10px;
 }
 
 
 #custom-screenrecording-indicator,
 #custom-idle-indicator,
+#custom-touchpad-indicator,
 #custom-nightlight,
 #custom-notification-silencing-indicator {
-  min-width: 12px;
-  margin-left: 5px;
-  margin-right: 0;
   font-size: 10px;
-  padding-bottom: 1px;
 }
 
 #custom-tailscale {
-  min-width: 12px;
-  margin-left: 6px;
-  margin-right: 9px;
   font-size: 12px;
-  padding-bottom: 0;
 }
 
 #custom-screenrecording-indicator.active {
@@ -133,8 +128,7 @@ tooltip {
 }
 
 #custom-voxtype {
-  min-width: 12px;
-  margin: 0 0 0 7.5px;
+  font-size: 10px;
 }
 
 #custom-voxtype.recording {
@@ -142,6 +136,7 @@ tooltip {
 }
 
 #custom-idle-indicator.active,
+#custom-touchpad-indicator.active,
 #custom-notification-silencing-indicator.active {
   color: #a55555;
 }

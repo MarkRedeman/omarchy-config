@@ -2,7 +2,7 @@
   "reload_style_on_change": true,
   "layer": "top",
   "position": "top",
-  "spacing": 0,
+  "spacing": 6,
   "height": 26,
   "modules-left": ["custom/omarchy", "hyprland/workspaces"],
   "modules-center": ["custom/nightlight", "clock", "hyprland/submap", "custom/update", "custom/voxtype", "custom/screenrecording-indicator", "custom/idle-indicator", "custom/touchpad-indicator", "custom/notification-silencing-indicator"],
