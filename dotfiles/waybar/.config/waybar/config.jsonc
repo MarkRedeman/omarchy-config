@@ -5,13 +5,11 @@
   "spacing": 0,
   "height": 26,
   "modules-left": ["custom/omarchy", "hyprland/workspaces"],
-  "modules-center": ["custom/nightlight", "clock", "hyprland/submap", "custom/update", "custom/voxtype", "custom/screenrecording-indicator", "custom/idle-indicator", "custom/notification-silencing-indicator"],
+  "modules-center": ["custom/nightlight", "clock", "hyprland/submap", "custom/update", "custom/voxtype", "custom/screenrecording-indicator", "custom/idle-indicator", "custom/touchpad-indicator", "custom/notification-silencing-indicator"],
   "modules-right": [
     "group/tray-expander",
-    "bluetooth",
     "network",
     "pulseaudio",
-    "cpu",
     "battery"
   ],
   "hyprland/workspaces": {
@@ -108,7 +106,12 @@
       "transition-duration": 600,
       "children-class": "tray-group-item"
     },
-    "modules": ["custom/expand-icon", "tray"]
+    "modules": [
+      "custom/expand-icon",
+      "tray",
+      "cpu",
+      "bluetooth",
+    ]
   },
   "custom/expand-icon": {
     "format": "",
@@ -138,6 +141,13 @@
     "exec": "$OMARCHY_PATH/default/waybar/indicators/idle.sh",
     "signal": 9,
     "return-type": "json"
+  },
+  "custom/touchpad-indicator": {
+    "on-click": "omarchy-toggle-touchpad on && pkill -RTMIN+12 waybar",
+    "exec": "$HOME/.config/waybar/indicators/touchpad.sh",
+    "signal": 12,
+    "return-type": "json",
+    "interval": 5
   },
   "custom/notification-silencing-indicator": {
     "on-click": "omarchy-toggle-notification-silencing",
