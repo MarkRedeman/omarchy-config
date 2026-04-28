@@ -83,6 +83,7 @@ tooltip {
 
 #custom-screenrecording-indicator,
 #custom-idle-indicator,
+#custom-nightlight,
 #custom-notification-silencing-indicator {
   min-width: 12px;
   margin-left: 5px;
@@ -93,6 +94,14 @@ tooltip {
 
 #custom-screenrecording-indicator.active {
   color: #a55555;
+}
+
+#custom-nightlight.active {
+  color: #D7A88D;
+}
+
+#custom-nightlight.inactive {
+  opacity: 0.65;
 }
 
 #custom-voxtype {

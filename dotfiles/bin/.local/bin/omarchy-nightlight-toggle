@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -euo pipefail
+
+ON_TEMP=4000
+OFF_TEMP=6000
+
+if ! pgrep -x hyprsunset >/dev/null; then
+  setsid uwsm-app -- hyprsunset >/dev/null 2>&1 &
+  sleep 0.5
+fi
+
+CURRENT_TEMP="$(hyprctl hyprsunset temperature 2>/dev/null | rg -o '[0-9]+' -m 1 || true)"
+
+if [[ "$CURRENT_TEMP" == "$ON_TEMP" ]]; then
+  hyprctl hyprsunset temperature "$OFF_TEMP" >/dev/null
+else
+  hyprctl hyprsunset temperature "$ON_TEMP" >/dev/null
+fi
+
+pkill -RTMIN+11 waybar >/dev/null 2>&1 || true
