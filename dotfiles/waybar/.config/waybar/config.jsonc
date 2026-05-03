@@ -158,6 +158,8 @@
   },
   "custom/nightlight": {
     "on-click": "omarchy-nightlight-toggle",
+    "on-scroll-up": "omarchy-brightness-display 5%+",
+    "on-scroll-down": "omarchy-brightness-display 5%-",
     "exec": "$HOME/.config/waybar/indicators/nightlight.sh",
     "signal": 11,
     "return-type": "json",
