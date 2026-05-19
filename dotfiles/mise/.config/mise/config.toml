@@ -1,8 +1,12 @@
 [tools]
 go = "latest"
+jq = "latest"
 julia = "1.12.6"
 node = "lts"
+prek = "latest"
+rg = "latest"
 usage = "latest"
+uv = "latest"
 
 [settings]
 disable_tools = ["python"]
