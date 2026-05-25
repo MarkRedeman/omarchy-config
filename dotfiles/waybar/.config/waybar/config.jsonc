@@ -4,7 +4,8 @@
   "position": "top",
   "spacing": 6,
   "height": 26,
-  "modules-left": ["custom/omarchy", "hyprland/workspaces"],
+  "expand-left": true,
+  "modules-left": ["custom/omarchy", "hyprland/workspaces", "custom/workspace-scroll-spacer"],
   "modules-center": ["custom/nightlight", "clock", "hyprland/submap", "custom/update", "custom/voxtype", "custom/screenrecording-indicator", "custom/idle-indicator", "custom/touchpad-indicator", "custom/notification-silencing-indicator"],
   "modules-right": [
     "group/tray-expander",
@@ -18,6 +19,13 @@
     "on-scroll-up": "omarchy-waybar-workspace-scroll prev",
     "on-scroll-down": "omarchy-waybar-workspace-scroll next",
     "format": "{name}"
+  },
+  "custom/workspace-scroll-spacer": {
+    "format": " ",
+    "expand": true,
+    "tooltip": false,
+    "on-scroll-up": "omarchy-waybar-workspace-scroll prev",
+    "on-scroll-down": "omarchy-waybar-workspace-scroll next"
   },
   "custom/omarchy": {
     "format": "<span font='omarchy'>\ue900</span>",
