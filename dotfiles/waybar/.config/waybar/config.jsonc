@@ -94,6 +94,8 @@
     "on-click-right": "pamixer -t",
     "tooltip-format": "Playing at {volume}%",
     "scroll-step": 5,
+    "on-scroll-up": "omarchy-swayosd-client --output-volume +1",
+    "on-scroll-down": "omarchy-swayosd-client --output-volume -1",
     "format-muted": "",
     "format-icons": {
       "headphone": "",
