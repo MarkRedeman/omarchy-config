@@ -3,26 +3,36 @@ set -euo pipefail
 
 direction=${1:-}
 if [[ "$direction" != "next" && "$direction" != "prev" ]]; then
-    echo "Usage: ${0##*/} next|prev" >&2
+    echo "Usage: ${0##*/} next|prev [cursor|focused]" >&2
     exit 2
 fi
 
-cursor_json=$(hyprctl cursorpos -j)
+target=${2:-cursor}
+if [[ "$target" != "cursor" && "$target" != "focused" ]]; then
+    echo "Usage: ${0##*/} next|prev [cursor|focused]" >&2
+    exit 2
+fi
+
 monitors_json=$(hyprctl monitors -j)
 workspaces_json=$(hyprctl workspaces -j)
 
-cursor_x=$(jq -r '.x' <<<"$cursor_json")
-cursor_y=$(jq -r '.y' <<<"$cursor_json")
-
-monitor_name=$(jq -r --argjson x "$cursor_x" --argjson y "$cursor_y" '
-    map(select(
-        ($x >= .x) and ($x < (.x + .width)) and
-        ($y >= .y) and ($y < (.y + .height))
-    )) | .[0].name // empty
-' <<<"$monitors_json")
-
-if [[ -z "$monitor_name" ]]; then
+if [[ "$target" == "focused" ]]; then
     monitor_name=$(jq -r '.[] | select(.focused) | .name' <<<"$monitors_json")
+else
+    cursor_json=$(hyprctl cursorpos -j)
+    cursor_x=$(jq -r '.x' <<<"$cursor_json")
+    cursor_y=$(jq -r '.y' <<<"$cursor_json")
+
+    monitor_name=$(jq -r --argjson x "$cursor_x" --argjson y "$cursor_y" '
+        map(select(
+            ($x >= .x) and ($x < (.x + .width)) and
+            ($y >= .y) and ($y < (.y + .height))
+        )) | .[0].name // empty
+    ' <<<"$monitors_json")
+
+    if [[ -z "$monitor_name" ]]; then
+        monitor_name=$(jq -r '.[] | select(.focused) | .name' <<<"$monitors_json")
+    fi
 fi
 
 active_id=$(jq -r --arg monitor "$monitor_name" '.[] | select(.name == $monitor) | .activeWorkspace.id' <<<"$monitors_json")
