@@ -1,2 +1,8 @@
 node_modules/
 old-dots/
+
+dotfiles/ssh/.ssh/*
+!dotfiles/ssh/.sssh/config
+
+dotfiles/gnupg/.gnupg/*
+!dotfiles/gnupg/.gnupg/gpg-agent.conf
