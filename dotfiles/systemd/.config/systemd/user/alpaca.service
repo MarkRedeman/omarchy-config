@@ -1,0 +1,16 @@
+[Unit]
+Description=Alpaca PAC-aware local HTTP proxy
+Documentation=https://github.com/samuong/alpaca
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/alpaca -C http://wpad.intel.com/wpad.dat
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
