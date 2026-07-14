@@ -41,15 +41,121 @@ Intel requires a VPN connection (GlobalProtect) plus an HTTP proxy for accessing
 | Auth required | No                               |
 | Local proxy   | `http://localhost:3128` (alpaca) |
 
-## Install
+## Setup / Installation
 
-Handled by `scripts/deploy.sh`, which runs:
+These steps cover both a fresh system and an existing one. On a fresh Omarchy deploy, `scripts/deploy.sh` handles everything automatically (see [Fresh deploy](#fresh-deploy-via-deploysh) below).
+
+### 1. Install alpaca
+
+**Arch Linux (AUR):**
 
 ```bash
-omarchy-pkg-add openconnect
 omarchy-pkg-aur-add alpaca-proxy
+# or with your preferred AUR helper:
+# yay -S alpaca-proxy
+# paru -S alpaca-proxy
+```
+
+**Other distros:** alpaca is available on several platforms. See [repology.org/project/alpaca-proxy](https://repology.org/project/alpaca-proxy/versions) or download a binary from [GitHub releases](https://github.com/samuong/alpaca/releases).
+
+### 2. Create the systemd user service
+
+Create `~/.config/systemd/user/alpaca.service`:
+
+```bash
+mkdir -p ~/.config/systemd/user
+```
+
+```ini
+# ~/.config/systemd/user/alpaca.service
+[Unit]
+Description=Alpaca PAC-aware local HTTP proxy
+Documentation=https://github.com/samuong/alpaca
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/alpaca -C http://wpad.intel.com/wpad.dat
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+```
+
+### 3. Enable and start the service
+
+```bash
+systemctl --user daemon-reload
 systemctl --user enable --now alpaca.service
 ```
+
+Verify it's running:
+
+```bash
+systemctl --user status alpaca.service
+```
+
+### 4. Set proxy environment variables
+
+Add the following to your shell config. For **fish** (`~/.config/fish/config.fish`):
+
+```fish
+set -gx http_proxy http://localhost:3128
+set -gx HTTP_PROXY http://localhost:3128
+set -gx https_proxy http://localhost:3128
+set -gx HTTPS_PROXY http://localhost:3128
+set -gx no_proxy localhost,127.0.0.0/8,::1
+set -gx NO_PROXY localhost,127.0.0.0/8,::1
+```
+
+For **bash/zsh** (`~/.bashrc`, `~/.zshrc`):
+
+```bash
+export http_proxy=http://localhost:3128
+export HTTP_PROXY=http://localhost:3128
+export https_proxy=http://localhost:3128
+export HTTPS_PROXY=http://localhost:3128
+export no_proxy=localhost,127.0.0.0/8,::1
+export NO_PROXY=localhost,127.0.0.0/8,::1
+```
+
+Open a new shell or source your config to apply.
+
+### 5. (Optional) Scoped git proxy for Intel repos
+
+If you use Intel's internal GitLab (e.g. `github.intel.com`), scope the proxy in `~/.config/git/config` so alpaca is only used for those URLs:
+
+```gitconfig
+[http "https://github.intel.com/"]
+    proxy = http://localhost:3128
+```
+
+Regular `github.com` clones go direct — no `http_proxy` interference.
+
+### 6. Verify
+
+```bash
+# Check alpaca is running
+systemctl --user status alpaca.service
+
+# Check proxy env vars are set
+echo "$http_proxy"
+
+# Test through alpaca (works both on and off VPN — off VPN routes DIRECT)
+curl -x http://localhost:3128 https://httpbin.org/ip
+```
+
+### Fresh deploy (via deploy.sh)
+
+On a new Omarchy system, `scripts/deploy.sh` handles all of the above:
+
+```bash
+~/projects/omarchy-config/scripts/deploy.sh
+```
+
+This stows the systemd unit from `dotfiles/systemd/`, installs `openconnect` and `alpaca-proxy`, runs `systemctl --user daemon-reload && enable --now alpaca.service`, and stows the fish config with global proxy env vars.
 
 ## Workflow
 
