@@ -43,3 +43,11 @@
 	password = 
 [format]
 	signoff = true
+[http "https://github.com"]
+        proxy = http://localhost:3128
+[http "https://lfs.github.com"]
+        proxy = http://localhost:3128
+[http "https://github-cloud.s3.amazonaws.com"]
+        proxy = http://localhost:3128
+[http "https://github-cloud.githubusercontent.com"]
+        proxy = http://localhost:3128
