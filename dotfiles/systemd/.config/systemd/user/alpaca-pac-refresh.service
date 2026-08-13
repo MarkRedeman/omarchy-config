@@ -1,0 +1,8 @@
+[Unit]
+Description=Refresh alpaca PAC file from Intel WPAD
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/alpaca-pac-refresh.sh

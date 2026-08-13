@@ -4,9 +4,14 @@ Documentation=https://github.com/samuong/alpaca
 After=network-online.target
 Wants=network-online.target
 
+# Uses a local PAC file (~/.config/alpaca/wpad.dat) instead of fetching
+# http://wpad.intel.com/wpad.dat on every network change. This makes alpaca
+# immune to wpad.intel.com DNS failures while on VPN, and keeps routing config
+# available off VPN (the default rule appends "; DIRECT" so unreachable
+# corporate proxies fall back to DIRECT). Refresh via alpaca-pac-refresh.timer.
 [Service]
 Type=simple
-ExecStart=/usr/bin/alpaca -C http://wpad.intel.com/wpad.dat
+ExecStart=/usr/bin/alpaca -C file://%h/.config/alpaca/wpad.dat
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal

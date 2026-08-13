@@ -117,8 +117,13 @@ omarchy-pkg-aur-add alpaca-proxy
 # Enable and start alpaca systemd user service
 # Requires the unit file stowed from dotfiles/systemd/
 echo "Enabling alpaca systemd user service..."
+mkdir -p "$HOME/.config/alpaca"
 systemctl --user daemon-reload
 systemctl --user enable --now alpaca.service
+
+# Enable the PAC refresh timer (re-fetches wpad.intel.com while on VPN)
+echo "Enabling alpaca PAC refresh timer..."
+systemctl --user enable --now alpaca-pac-refresh.timer
 
 # Doom Emacs clone/install/sync disabled: managed separately
 # To re-enable, uncomment below and restore DOOM_CONFIG_REPO_SSH/HTTPS variables
