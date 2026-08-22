@@ -65,10 +65,8 @@ for package in "$DOTFILES_DIR"/*/; do
 done
 git -C "$REPO_DIR" checkout -- "$DOTFILES_DIR"
 
-# Activate the Aether theme (populates ~/.config/omarchy/current/ which is
-# runtime state managed by omarchy-theme-set, not tracked in the repo)
-echo "Activating Aether theme..."
-omarchy-theme-set Aether
+# Theme: stock quattro themes are used (custom Aether theme was discarded;
+# see QUATRO-MIGRATION.md §4.3).
 
 # Install fish shell with omarchy-fish (provides functions, fzf.fish, starship init)
 # Uses bash auto-launch approach instead of chsh to avoid black screen on boot

@@ -4,6 +4,15 @@ Tracker for upgrading these dotfiles from Omarchy **v3 (3.8.x)** to Omarchy
 **quattro (4.0.0.alpha)**. References live in `references/omarchy-v3/` and
 `references/omarchy-quatro/`.
 
+> ## TODO — open work item
+>
+> - **Port `omarchy-workspace-select` off walker dmenu** (walker no longer
+>   exists in quattro). It is bound to `SUPER + S` and currently fails
+>   silently on quattro. Rewrite it against `omarchy-menu-select` (the
+>   Quickshell menu's dmode) or drop it if quattro's workspace UX covers it.
+>   Everything else is either done, obsolete-and-removed, or blocked on a
+>   live quattro system ([V] items below).
+
 Status legend:
 
 | Mark | Meaning |
@@ -66,15 +75,16 @@ drawer group, volume scroll wired to swayosd.
 - `omarchy-nightlight-toggle` — flips hyprsunset between 4000K/6000K and pokes
   the waybar indicator
 
-### 1.5 Aether theme
+### 1.5 Aether theme (discarded in the quattro migration)
 
 Custom dark palette (background `#07070B`, foreground `#f0dbcf`,
 accent-ish `color4 #9a9dbc`), sharp corners everywhere (`border-radius: 0`),
 dark gradient active-border in Hyprland, matching configs for alacritty,
 kitty, ghostty, btop, chromium, mako, walker, wofi, waybar, swayosd, vscode,
 neovim, warp. Ships one wallpaper. Fonts: Intel One Mono (AUR, installed by
-`setup-fonts.sh`). `~/.config/hypr/shaders` is managed outside stow via
-absolute symlinks to `/usr/share/aether/shaders/` (see `.stow-local-ignore`).
+`setup-fonts.sh`). `~/.config/hypr/shaders` was managed outside stow via
+absolute symlinks to `/usr/share/aether/shaders/`. **The whole theme was
+removed on the `quatro` branch; stock themes are used now.**
 
 ### 1.6 Session, auth & shell stack
 
@@ -195,16 +205,19 @@ New quattro-style files (all minimal unless marked otherwise):
 - [x] Keep `xdph.conf` — unchanged in quattro
 - [x] Keep `setup-fonts.sh` (Intel One Mono)
 
-Deletions at cutover (files stay until the machine upgrades):
+Deletions at cutover — **done** (legacy files removed from the `quatro`
+branch; the v3 layout lives on `mark/oma-dots`):
 
-- [D] `hyprland.conf` (entry point replaced by `hyprland.lua`)
-- [D] `omarchy-defaults.conf` (inlined-defaults pattern obsolete)
-- [D] `plugins.conf` (hy3 tab styling → §3 open question)
-- [D] `hypridle.conf` (timings → `shell.json`; kbd-backlight listener → below)
-- [D] `hyprlock.conf` (lock UI now a shell plugin)
-- [D] `envs.conf` (`SSH_AUTH_SOCK` → `uwsm/env.d/`)
-- [V] `lock-and-clear-gpg.sh` — unreferenced in repo; confirm whether anything
-      invokes it before deleting
+- [x] `hyprland.conf` (entry point replaced by `hyprland.lua`)
+- [x] `omarchy-defaults.conf` (inlined-defaults pattern obsolete)
+- [x] `plugins.conf` (hy3 tab styling → §3 open question)
+- [x] `hypridle.conf` (timings → `shell.json`)
+- [x] `hyprlock.conf` (lock UI now a shell plugin)
+- [x] `envs.conf` (`SSH_AUTH_SOCK` → `uwsm/env.d/50-user.conf`)
+- [x] per-topic v3 confs: `bindings/input/looknfeel/monitors/autostart.conf`
+- [x] `lock-and-clear-gpg.sh` — verified unreferenced, removed
+- [x] `dotfiles/waybar` package removed
+- [x] `omarchy-nightlight-toggle` script removed
 
 Deferred bindings/extras — resolved during the parity pass:
 
@@ -234,7 +247,7 @@ Still open after the parity pass ([V]/[D]):
       (left: menu + workspaces; center: indicators + clock; right: tray,
       bluetooth, tailscale, network, audio, power) + `idle.screensaver 900` /
       `idle.lock 960`
-- [O] `dotfiles/waybar` package — delete at cutover (built-in equivalents:
+- [x] `dotfiles/waybar` package — removed (built-in equivalents:
       NightLight, Dnd, StayAwake, ScreenRecording, Dictation, tailscale panel)
 - [V] Touchpad indicator/toggle — no known built-in widget; find equivalent
       or accept loss initially
@@ -243,26 +256,21 @@ Still open after the parity pass ([V]/[D]):
 
 ### 4.3 Theme (Aether)
 
-- [x] Create `themes/aether/colors.toml` from the palette in
-      `aether.override.css` (bg `#07070B`, fg `#f0dbcf`, color0–15 ramp,
-      accent `color4 #9a9dbc`, hyprland border gradient). Sharp-corner
-      styling via `shell.toml` radius tokens still open ([V])
-- [ ] Keep `backgrounds/`; add `preview.png` if we want it in the switcher
-- [ ] Decide per-file: carry over hand-written `alacritty.toml`, `btop.theme`,
-      `chromium.theme`, `ghostty.conf`, `kitty.conf`, `neovim.lua`,
-      `vscode.json`, `icons.theme` as-is, or let templates generate them
-      from `colors.toml` (preferred where possible)
-- [O] Drop at cutover: `mako.ini`, `walker.css`, `wofi.css`, `waybar.css`,
-      `swayosd.css`, `hyprlock.conf`, `warp.yaml`
-- [V] `aether.override.css` (GTK accent/sharp corners) — find the quattro
-      mechanism for GTK/libadwaita theming
-- [V] `/usr/share/aether/shaders` symlink source — does it still exist?
-- [x] Branding (`about.txt`, `screensaver.txt`) — unchanged concept
+**Discarded by decision** — the custom Aether theme (and its wallpaper) was
+removed from the repo; stock quattro themes are used instead.
+
+- [x] Remove `themes/aether/` entirely (incl. `colors.toml`, backgrounds,
+      all hand-written app theme files)
+- [x] Drop dead-in-quattro files with it: `mako.ini`, `walker.css`,
+      `wofi.css`, `waybar.css`, `swayosd.css`, `hyprlock.conf`, `warp.yaml`
+- [x] `deploy.sh` no longer activates Aether; pick a stock theme after
+      upgrade (`omarchy theme set <name>`)
+- [x] Branding (`about.txt`, `screensaver.txt`) kept
 
 ### 4.4 Scripts (`dotfiles/bin`)
 
-- [O] `omarchy-nightlight-toggle` — superseded by `omarchy-toggle-nightlight`;
-      delete at cutover
+- [x] `omarchy-nightlight-toggle` — removed; superseded by
+      `omarchy-toggle-nightlight`
 - [x] `omarchy-waybar-workspace-scroll` — pure hyprctl/jq, works on quattro
       unchanged; now bound to SUPER+N / SUPER+P (monitor-scoped cycling).
       Rename optional post-cutover

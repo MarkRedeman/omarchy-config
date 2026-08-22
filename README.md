@@ -2,9 +2,10 @@
 
 Personal [Omarchy](https://omarchy.org) (Hyprland) dotfiles with [hy3](https://github.com/outfoxxed/hy3) for i3-style tiling, managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
-> **quattro (v4) migration in progress** — see [QUATRO-MIGRATION.md](QUATRO-MIGRATION.md).
-> This branch (`quatro`) carries the v4-ready layout; `hypr` ships both the
-> legacy `.conf` tree and the new Lua overrides until cutover.
+> **quattro (v4) migration** — see [QUATRO-MIGRATION.md](QUATRO-MIGRATION.md).
+> This branch (`quatro`) targets Omarchy quattro only: Hyprland Lua config,
+> Quickshell shell, no custom theme. The legacy v3 layout lives on the
+> `mark/oma-dots` branch.
 
 ## Install
 

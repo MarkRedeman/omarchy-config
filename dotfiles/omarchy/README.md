@@ -1,6 +1,6 @@
 # Omarchy
 
-Omarchy desktop framework configuration: branding, custom themes, and hooks.
+Omarchy desktop framework configuration: branding, shell/bar settings, and hooks.
 
 ## Target
 
@@ -10,7 +10,6 @@ Omarchy desktop framework configuration: branding, custom themes, and hooks.
 
 ```bash
 stow --target="$HOME" --dir=dotfiles omarchy
-omarchy-theme-set Aether
 ```
 
 ## Structure
@@ -19,15 +18,11 @@ omarchy-theme-set Aether
 |---|---|
 | `branding/` | Custom about text and screensaver text |
 | `hooks/` | Omarchy lifecycle hooks (sample files) |
-| `themes/aether/` | Custom Aether theme with all component styles |
-
-## Dependencies
-
-- [Omarchy](https://omarchy.org/) installed at `~/.local/share/omarchy/`
+| `shell.json` | Quickshell bar layout and idle timings (quattro) |
 
 ## Notes
 
-The `current/` directory (theme.name, active theme files, wallpaper) is **not**
-in this stow package. It is runtime state managed by `omarchy-theme-set` and
-would conflict with stow symlinks. Run `omarchy-theme-set Aether` after stowing
-to activate the theme.
+- The custom Aether theme was discarded; stock quattro themes are used
+  (`omarchy theme set <name>`).
+- `~/.local/state/omarchy/current/` holds the generated theme state on
+  quattro and is not part of this stow package.
