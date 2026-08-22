@@ -171,7 +171,7 @@ Open questions:
 ### 4.0 Repo groundwork
 
 - [x] Analyze v3 ↔ quattro deltas, decide approach (hy3 attempt, minimal port)
-- [ ] Create `quatro` branch so the live v3 machine keeps sourcing
+- [x] Create `quatro` branch so the live v3 machine keeps sourcing
       `mark/oma-dots` until cutover
 - [x] Write this tracker
 
@@ -179,17 +179,18 @@ Open questions:
 
 New quattro-style files (all minimal unless marked otherwise):
 
-- [ ] `hyprland.lua` — entry point requiring defaults + user modules
-- [ ] `bindings.lua` — core i3 set via `hl.plugin.hy3` (focus/move HJKL +
+- [x] `hyprland.lua` — entry point requiring defaults + user modules
+- [x] `bindings.lua` — core i3 set via `hl.plugin.hy3` (focus/move HJKL +
       arrows, close, fullscreen, tab groups, focus parent/child, workspaces
       1–0/Z) with `hl.unbind` on clashing defaults
-- [ ] `input.lua` — `kb_variant altgr-intl`, `caps:ctrl_modifier`,
-      repeat 40/600, numlock, touchpad `scroll_factor 0.4`, per-terminal
-      scroll_touchpad rules
-- [ ] `looknfeel.lua` — gaps 0 / border 0 / dim_inactive 0.1,
+- [x] `input.lua` — `kb_variant altgr-intl`, `caps:ctrl_modifier`,
+      repeat 40/600 (touchpad `scroll_factor 0.4` and per-terminal
+      scroll_touchpad rules are already quattro defaults — no override needed)
+- [x] `looknfeel.lua` — gaps 0 / border 0 / dim_inactive 0.1,
       workspace_back_and_forth, guarded `layout = "hy3"` (dwindle fallback)
-- [ ] `monitors.lua` — `preferred,auto,1.25`
-- [ ] `autostart.lua` — `hyprpm reload -n`
+- [x] `monitors.lua` — `preferred,auto,1.25` + GDK_SCALE=2
+- [x] `autostart.lua` — `hyprpm reload -n`
+- [x] Emacs fully-opaque window rule carried into `hyprland.lua`
 - [x] Keep `hyprsunset.conf` (identity profile) — unchanged in quattro
 - [x] Keep `xdph.conf` — unchanged in quattro
 - [x] Keep `setup-fonts.sh` (Intel One Mono)
@@ -213,9 +214,9 @@ control-panel clusters, media-key OSD variants, ALT+TAB cycling tweaks.
 
 ### 4.2 Bar & indicators (`waybar` → `shell.json`)
 
-- [ ] Add `dotfiles/omarchy/.config/omarchy/shell.json`: bar layout
+- [x] Add `dotfiles/omarchy/.config/omarchy/shell.json`: bar layout
       (left: menu + workspaces; center: indicators + clock; right: tray,
-      network, audio, battery/power) + `idle.screensaver 900` /
+      bluetooth, tailscale, network, audio, power) + `idle.screensaver 900` /
       `idle.lock 960`
 - [O] `dotfiles/waybar` package — delete at cutover (built-in equivalents:
       NightLight, Dnd, StayAwake, ScreenRecording, Dictation, tailscale panel)
@@ -226,9 +227,10 @@ control-panel clusters, media-key OSD variants, ALT+TAB cycling tweaks.
 
 ### 4.3 Theme (Aether)
 
-- [ ] Create `themes/aether/colors.toml` from the palette in
+- [x] Create `themes/aether/colors.toml` from the palette in
       `aether.override.css` (bg `#07070B`, fg `#f0dbcf`, color0–15 ramp,
-      sharp-corner styling via `shell.toml` radius tokens if supported)
+      accent `color4 #9a9dbc`, hyprland border gradient). Sharp-corner
+      styling via `shell.toml` radius tokens still open ([V])
 - [ ] Keep `backgrounds/`; add `preview.png` if we want it in the switcher
 - [ ] Decide per-file: carry over hand-written `alacritty.toml`, `btop.theme`,
       `chromium.theme`, `ghostty.conf`, `kitty.conf`, `neovim.lua`,
@@ -258,7 +260,9 @@ control-panel clusters, media-key OSD variants, ALT+TAB cycling tweaks.
 - [x] 1Password locking — preserved via `omarchy-system-lock`
 - [ ] Verify suspend path: `before_sleep_cmd`/`after_sleep_cmd` behaviour
       (was `OMARCHY_LOCK_ONLY=true omarchy-system-lock` + wake script)
-- [ ] `SSH_AUTH_SOCK` → new `dotfiles/uwsm/.config/uwsm/env.d/user.conf`
+- [x] `SSH_AUTH_SOCK` → added `dotfiles/uwsm/.config/uwsm/env.d/50-user.conf`
+      (also carries TERMINAL/EDITOR from the legacy `uwsm/default`; old file
+      stays until cutover)
 
 ### 4.6 Other packages (verify-only)
 
@@ -271,12 +275,12 @@ control-panel clusters, media-key OSD variants, ALT+TAB cycling tweaks.
 
 ### 4.7 Deploy tooling & docs
 
-- [ ] `deploy.sh`: v3/v4 mode guard (skip hy3/hyprpm block only if quattro
-      proves unnecessary — likely still required), theme-set call, drop
-      waybar-era assumptions
-- [ ] `scripts/stow.sh` unchanged (adopt flow is exactly what post-upgrade
+- [x] `deploy.sh`: version guard via `/usr/share/omarchy/version` — v4 uses
+      `omarchy-install-service-tailscale` and skips the v3-only
+      `omarchy-setup-fish`; hy3/hyprpm block kept (still required)
+- [x] `scripts/stow.sh` unchanged (adopt flow is exactly what post-upgrade
       restow needs)
-- [ ] Update root `README.md` + `dotfiles/*/README.md` to quattro reality
+- [x] Update root `README.md` + `dotfiles/hypr/README.md` to quattro reality
 - [ ] Add cutover section to `deploy.sh` docs (unstow legacy → upgrade → restow)
 
 ### 4.8 Machine go-live runbook (when ready)

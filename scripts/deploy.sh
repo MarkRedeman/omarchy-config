@@ -10,6 +10,14 @@ sudo -v
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOTFILES_DIR="$REPO_DIR/dotfiles"
 
+# Detect Omarchy major version (quattro ships /usr/share/omarchy/version as 4.x)
+if [[ -r /usr/share/omarchy/version ]]; then
+    OMARCHY_MAJOR="$(cut -d. -f1 < /usr/share/omarchy/version)"
+else
+    OMARCHY_MAJOR="3"
+fi
+echo "Detected Omarchy major version: $OMARCHY_MAJOR"
+
 # Check if stow is installed, install via omarchy-pkg-add if missing
 if ! command -v stow &> /dev/null; then
     echo "Installing GNU Stow..."
@@ -68,11 +76,19 @@ omarchy-theme-set Aether
 echo "Setting up fish shell..."
 omarchy-pkg-add fish fzf fd bat eza zoxide starship
 omarchy-pkg-aur-add omarchy-fish
-omarchy-setup-fish
+if [[ "$OMARCHY_MAJOR" == "3" ]]; then
+    omarchy-setup-fish
+else
+    echo "Skipping omarchy-setup-fish (quattro has no setup command; see QUATRO-MIGRATION.md §4.6)"
+fi
 
 # Install tailscale VPN
 echo "Installing Tailscale..."
-omarchy-install-tailscale
+if [[ "$OMARCHY_MAJOR" == "3" ]]; then
+    omarchy-install-tailscale
+else
+    omarchy-install-service-tailscale
+fi
 
 # Install pass (password store): GPG key import and store clone are manual
 # See pass.md for setup instructions

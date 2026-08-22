@@ -1,0 +1,45 @@
+# Aether — dark, muted palette with a warm paper foreground.
+# Derived from the palette in aether.override.css (v3).
+# See https://github.com/basecamp/omarchy/blob/master/docs/theming.md
+
+mode = "dark"
+
+accent = "#9a9dbc"
+selection = "#353543"
+muted = "#353543"
+
+background = "#07070B"
+dark_background = "#040407"
+darker_background = "#000004"
+lighter_background = "#12121A"
+
+foreground = "#f0dbcf"
+dark_foreground = "#6b6b78"
+light_foreground = "#e2eded"
+bright_foreground = "#f0dbcf"
+
+red = "#DD5C5C"
+green = "#9CAB8D"
+yellow = "#b4b691"
+blue = "#9a9dbc"
+magenta = "#c09dc8"
+cyan = "#abc8c9"
+
+color0 = "#07070B"
+color1 = "#DD5C5C"
+color2 = "#9CAB8D"
+color3 = "#b4b691"
+color4 = "#9a9dbc"
+color5 = "#c09dc8"
+color6 = "#abc8c9"
+color7 = "#D7A88D"
+color8 = "#353543"
+color9 = "#f0a5a5"
+color10 = "#cad3c1"
+color11 = "#dadcc7"
+color12 = "#d0d2e1"
+color13 = "#e6d7ea"
+color14 = "#e2eded"
+color15 = "#f0dbcf"
+
+hyprland_active_border = "rgba(07070Bee) rgba(353543ee) 45deg"
