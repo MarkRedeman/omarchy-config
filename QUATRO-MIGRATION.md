@@ -206,11 +206,27 @@ Deletions at cutover (files stay until the machine upgrades):
 - [V] `lock-and-clear-gpg.sh` — unreferenced in repo; confirm whether anything
       invokes it before deleting
 
-Deferred bindings/extras ([D] — port only if missed after go-live):
-resize submap, `-`/`=` resize keys, universal copy/paste Insert-forwarding,
-Apple display brightness, monitor-scale cycling, cursor zoom, tmux launcher,
-app-launcher cluster beyond core, notification COMMA cluster, share/info/
-control-panel clusters, media-key OSD variants, ALT+TAB cycling tweaks.
+Deferred bindings/extras — resolved during the parity pass:
+
+- [x] resize submap ported via `hl.dsp.submap` / `hl.define_submap`
+- [x] `-`/`=` quick-resize keys — quattro defaults are identical
+- [x] universal copy/paste — built-in and terminal-aware (supersedes the
+      Insert-forwarding trick)
+- [x] Apple display brightness (CTRL+F1/F2, SHIFT+CTRL+F2)
+- [x] monitor-scale cycling — built-in on SLASH / ALT+SLASH
+- [x] cursor zoom, tmux launcher, app-launcher cluster, notification COMMA
+      cluster, share/info/control-panel clusters, media keys, ALT+TAB — all
+      covered by quattro defaults
+
+Still open after the parity pass ([V]/[D]):
+
+- [V] hy3 `move_to_workspace` vs built-in `window.move`: we use the built-in
+      for cross-workspace moves (matches v3 `movetoworkspace*` exactly);
+      confirm behaviour under the hy3 layout at first boot
+- [D] mako's "restore last notification" has no equivalent — history panel
+      replaces it; revisit if missed
+- [V] `SUPER+SPACE` kept as Omarchy menu (v3 had a tiling/floating focus
+      toggle there); float toggle is on SUPER+T — revisit if missed
 
 ### 4.2 Bar & indicators (`waybar` → `shell.json`)
 
@@ -247,10 +263,13 @@ control-panel clusters, media-key OSD variants, ALT+TAB cycling tweaks.
 
 - [O] `omarchy-nightlight-toggle` — superseded by `omarchy-toggle-nightlight`;
       delete at cutover
-- [ ] `omarchy-waybar-workspace-scroll` — keep name (keybindings reference
-      it) but strip waybar signal poke; verify monitor-scoping still needed
-- [D] `omarchy-workspace-select` — walker dmenu is gone; port to
-      `omarchy-menu-select` (or drop if quattro's workspace UX covers it)
+- [x] `omarchy-waybar-workspace-scroll` — pure hyprctl/jq, works on quattro
+      unchanged; now bound to SUPER+N / SUPER+P (monitor-scoped cycling).
+      Rename optional post-cutover
+- [D] `omarchy-workspace-select` — bound to SUPER+S, but the script still
+      drives walker dmenu which no longer exists; port to
+      `omarchy-menu-select` before/after go-live (or drop if quattro's
+      workspace UX covers it)
 
 ### 4.5 Idle / lock / security chain
 
