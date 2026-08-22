@@ -6,12 +6,13 @@ Tracker for upgrading these dotfiles from Omarchy **v3 (3.8.x)** to Omarchy
 
 > ## TODO — open work item
 >
-> - **Port `omarchy-workspace-select` off walker dmenu** (walker no longer
->   exists in quattro). It is bound to `SUPER + S` and currently fails
->   silently on quattro. Rewrite it against `omarchy-menu-select` (the
->   Quickshell menu's dmode) or drop it if quattro's workspace UX covers it.
->   Everything else is either done, obsolete-and-removed, or blocked on a
->   live quattro system ([V] items below).
+> - **Build the `mark.workspace-switcher` shell plugin** after the machine
+>   upgrade. Full spec: [`plugins/mark.workspace-switcher/PLAN.md`](plugins/mark.workspace-switcher/PLAN.md).
+>   It replaces the walker-based `omarchy-workspace-select` (bound to
+>   `SUPER + S`, fails silently on quattro), takes over SUPER+N/P cycling,
+>   and adds named-workspace bar chips. Implementation starts only after the
+>   quattro upgrade; everything else below is done, obsolete-and-removed, or
+>   blocked on a live system ([V] items).
 
 Status legend:
 
@@ -271,13 +272,11 @@ removed from the repo; stock quattro themes are used instead.
 
 - [x] `omarchy-nightlight-toggle` — removed; superseded by
       `omarchy-toggle-nightlight`
-- [x] `omarchy-waybar-workspace-scroll` — pure hyprctl/jq, works on quattro
-      unchanged; now bound to SUPER+N / SUPER+P (monitor-scoped cycling).
-      Rename optional post-cutover
-- [D] `omarchy-workspace-select` — bound to SUPER+S, but the script still
-      drives walker dmenu which no longer exists; port to
-      `omarchy-menu-select` before/after go-live (or drop if quattro's
-      workspace UX covers it)
+- [D] `omarchy-workspace-select` — superseded by the `mark.workspace-switcher`
+      plugin (see top TODO + [`plugins/mark.workspace-switcher/PLAN.md`](plugins/mark.workspace-switcher/PLAN.md));
+      script is deleted once the plugin's cycling and selector are verified
+- [D] `omarchy-waybar-workspace-scroll` — will retire when the plugin takes
+      over SUPER+N/P cycling
 
 ### 4.5 Idle / lock / security chain
 
