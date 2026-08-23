@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "mark.workspace-switcher",
+  "name": "Workspace Switcher",
+  "version": "0.1.0",
+  "author": "Mark Redeman",
+  "license": "MIT",
+  "description": "Monitor-scoped workspace cycling, a switcher panel on SUPER+S, and occupied-only name chips in the bar",
+  "keepLoaded": true,
+  "kinds": [
+    "panel",
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "panel": "Panel.qml",
+    "barWidget": "Widget.qml"
+  },
+  "barWidget": {
+    "displayName": "Workspace Switcher",
+    "description": "Shows only occupied/focused workspaces as name chips (v3 waybar style)",
+    "category": "Compositor",
+    "allowMultiple": false,
+    "defaultSection": "left"
+  }
+}

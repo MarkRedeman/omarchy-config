@@ -110,9 +110,15 @@ o.bind(
 -- SUPER + P pseudo window.
 hl.unbind("SUPER + S")
 hl.unbind("SUPER + P")
-o.bind("SUPER + S", "Workspace selector", "omarchy-workspace-select")
-o.bind("SUPER + N", "Next workspace on this monitor", "omarchy-waybar-workspace-scroll next focused")
-o.bind("SUPER + P", "Previous workspace on this monitor", "omarchy-waybar-workspace-scroll prev focused")
+
+-- Workspace navigation runs through the mark.workspace-switcher shell
+-- plugin: S toggles the switcher panel, N/P cycle existing workspaces of the
+-- focused monitor with wrap-around (never creating anything). Targets are
+-- computed in QML and dispatched via the Lua form — plain hyprctl string
+-- dispatches don't resolve under quattro's Lua config.
+o.bind("SUPER + S", "Workspace selector", "omarchy-shell shell toggle mark.workspace-switcher")
+o.bind("SUPER + N", "Next workspace on this monitor", "omarchy-shell shell call mark.workspace-switcher cycle next")
+o.bind("SUPER + P", "Previous workspace on this monitor", "omarchy-shell shell call mark.workspace-switcher cycle prev")
 
 -- Move window to next/prev workspace, following it (i3: $mod+Shift+n/p).
 -- SUPER + SHIFT + N was quattro's Editor binding.

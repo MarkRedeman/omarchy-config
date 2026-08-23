@@ -1,149 +1,114 @@
-# mark.workspace-switcher — implementation plan
+# mark.workspace-switcher
 
-Status: **drafted, awaiting machine upgrade**. Implementation starts only after
-the quattro upgrade (see `QUATRO-MIGRATION.md` §4.8). Decisions below are
-locked; `[V]` items are verified against the running shell during
-implementation.
+Status: **v0.1 implemented** (2026-08-23) — bar chips, monitor-scoped cycling,
+and the workspace switcher panel are live. The window picker (Mode B) is
+deferred; see §8.
 
-A single Omarchy shell plugin that replaces the walker-based workspace
-selector, adds a window picker, takes over monitor-scoped workspace cycling,
-and shows named workspaces in the bar.
+A single Omarchy shell plugin that shows occupied-only workspaces in the bar,
+owns SUPER+N/P monitor-scoped cycling, and replaces the retired walker-based
+selector on SUPER+S.
 
 ## 1. Why a plugin (goals)
 
-- **Speed**: current selector spawns bash → `hyprctl -j` → several `jq` forks →
-  walker (GUI cold start) per keypress (~300–800 ms). QML binds live
-  Quickshell state instead — zero process spawns, opens within a frame.
-- **Named workspaces become first-class**: today they vanish from SUPER+N/P
-  cycling (Hyprland destroys empty workspaces, so they drop out of the
-  `hyprctl workspaces` list) and never appear in the bar (built-in widget
-  hardcodes ids 1–10).
-- **Window navigation**: jump straight to any window's workspace and focus it.
+- **Correctness**: quattro's Lua config broke the old tooling outright —
+  `hyprctl dispatch <string>` never resolves under the Lua config
+  (`hl.dispatch: expected a dispatcher`), killing both
+  `omarchy-waybar-workspace-scroll` (N/P) and walker-based
+  `omarchy-workspace-select` (S). The plugin computes targets in QML and only
+  ever dispatches through the Lua form (`hyprctl dispatch 'hl.dsp.focus({ … })'`),
+  which does resolve.
+- **Named workspaces become first-class**: they survive in cycling order and
+  appear in the bar (the built-in widget hardcodes ids 1–10).
+- **Speed**: QML state instead of bash → hyprctl → jq → walker per keypress.
 - Survives quattro updates by living in user plugin space; hot-reloads on save.
 
 Non-goals: replacing the bar itself, autotiling features, session management.
 
 ## 2. Architecture & files
 
-Final runtime home (stowed):
+Runtime home (stowed from the repo):
 
 ```
 dotfiles/omarchy-plugins/.config/omarchy/plugins/mark.workspace-switcher/
-├── manifest.json
-├── Panel.qml            # switcher surface, two modes
-├── Widget.qml           # custom Workspaces bar widget
-└── WorkspacesModel.js   # shared sort/filter/cycle logic (pure JS)
+├── manifest.json        # kinds: panel + bar-widget, keepLoaded: true
+├── Panel.qml            # switcher surface (workspaces mode) + cycle() IPC
+├── Widget.qml           # occupied-only name chips for the bar
+└── WorkspacesModel.js   # shared list/sort/cycle logic (.pragma library)
 ```
 
-Install: stow → `omarchy-shell shell rescanPlugins` → `omarchy plugin enable
-mark.workspace-switcher`.
+Install: `scripts/deploy.sh` stows it like any package; then
+`omarchy-shell shell rescanPlugins`. Enabling happens through `shell.json`
+(the widget sits in `bar.layout.left`, the panel needs no entry because
+third-party panels in `plugins[]` are only required when there is no other
+enabled kind — this plugin is enabled via its bar-widget placement).
 
-## 3. Manifest (draft)
+## 3. Hyprland facts the design relies on (verified 0.56.2)
 
-```json
-{
-  "schemaVersion": 1,
-  "id": "mark.workspace-switcher",
-  "name": "Workspace Switcher",
-  "version": "0.1.0",
-  "author": "Mark Redeman",
-  "description": "Fast workspace/window switcher with monitor-scoped cycling",
-  "kinds": ["panel", "bar-widget"],
-  "entryPoints": { "panel": "Panel.qml", "barWidget": "Widget.qml" },
-  "barWidget": { "defaultSection": "left" }
-}
-```
+- Numeric workspaces have positive ids; anything above 10 can exist via
+  e+1-style moves. Id 10 renders as "0".
+- **All named workspaces share one negative id** (-1337 during testing), so
+  ids identify neither order nor even uniqueness among them. Named spaces are
+  addressed by `name:<x>` and tracked by name everywhere.
+- Special workspaces are negative-id entries named `special:*`; excluded by
+  name prefix, not id sign.
+- Empty workspaces are destroyed the moment focus leaves them, so the bar and
+  the cycling universe are "existing" only — cycling wraps and never creates.
+- Plugin string dispatchers are unreachable from Lua binds and from
+  `hyprctl dispatch <name>` (upstream gap, hyprwm/Hyprland discussion #14451);
+  the parenthesized Lua-eval form works, which is all we need.
 
-Panel entry point must expose `open(payloadJson)` / `close()`; host injects
-`omarchyPath`, `shell`, `manifest`, registries.
+## 4. Ordering & cycling semantics (locked)
 
-## 4. Panel UX
+- Bar chips and panel rows: numeric workspaces ascending (1..10, then any
+  higher numbers), followed by named workspaces in first-seen creation order.
+- Creation order lives in a shared registry inside WorkspacesModel.js
+  (single instance per engine thanks to `.pragma library`), fed by
+  `createworkspace` raw events; re-created names keep their original slot for
+  the life of the shell session.
+- SUPER+N/P scope = focused monitor, wrap-around, existing workspaces only,
+  never create/destroy.
+- SUPER+S lists all monitors (rows carry a monitor badge once multi-monitor);
+  activating a foreign-monitor row moves focus there (native behaviour).
 
-Summon: `SUPER+S` → `omarchy-shell shell toggle mark.workspace-switcher`.
-Payload may preset the mode: `{"mode":"windows"}`.
-
-**Mode A — Workspaces** (default)
-
-- Rows: `id/name · monitor badge · Nw window count`
-- Live filter box (subsequence match on name/id)
-- Enter/click activates: dispatch focus to that workspace
-- Typing a non-matching string creates + switches to that *named* workspace
-  (preserves old walker-selector behaviour)
-- Esc closes
-
-**Mode B — Windows**
-
-- `Tab` toggles modes; rows: app class/icon · title · workspace · monitor
-- Activating focuses the owning workspace and then the window
-- Same filter box and close behaviour
-
-## 5. Configuration (manifest schema)
-
-| Key | Type | Default | Purpose |
-| --- | ---- | ------- | ------- |
-| `defaultMode` | string | `"workspaces"` | mode opened by plain summon |
-| `scope` | string | `"all"` | `"all"` / `"cursor"` / `"focused"` monitor filtering |
-| `showMonitorBadges` | boolean | `true` | badge per row in multi-monitor setups |
-| `showWindowCounts` | boolean | `true` | `Nw` suffix like the old dmenu |
-| `namedAfterNumbers` | boolean | `true` | sort named workspaces after numeric ones |
-| `closeOnActivate` | boolean | `true` | dismiss panel after switching |
-
-Exact schema type names beyond `multiselect`/`boolean` to be confirmed against
-`shell/services/PluginRegistry.qml` at implementation.
-
-## 6. Multi-monitor semantics
-
-- Every row carries its owning monitor; activating a foreign-monitor workspace
-  moves focus there (native Hyprland behaviour).
-- `scope` config narrows the list for per-monitor pickers.
-- Window mode always shows each window's monitor.
-
-## 7. Monitor-scoped cycling (plugin-owned)
-
-Rebind in `bindings.lua`:
+## 5. Wiring
 
 ```lua
+-- bindings.lua
+o.bind("SUPER + S", "Workspace selector",
+       "omarchy-shell shell toggle mark.workspace-switcher")
 o.bind("SUPER + N", "Next workspace on this monitor",
        "omarchy-shell shell call mark.workspace-switcher cycle next")
 o.bind("SUPER + P", "Previous workspace on this monitor",
        "omarchy-shell shell call mark.workspace-switcher cycle prev")
 ```
 
-Semantics (locked):
+Retired with this change: `dotfiles/bin/.local/bin/omarchy-workspace-select`
+and `omarchy-waybar-workspace-scroll` (both dead under quattro's config
+parser).
 
-- Scope = focused monitor (shell runs in-session; no cursor/focused split
-  needed anymore)
-- Order: numeric ascending, then known named workspaces (respecting
-  `namedAfterNumbers`)
-- Universe = existing ∪ recently-remembered named workspaces; **wrap only —
-  cycling never creates anything**
-- `dotfiles/bin/omarchy-waybar-workspace-scroll` retires once the plugin cycle
-  is verified
+## 6. Panel UX (Mode A — shipped)
 
-## 8. Bar widget (v1)
+- Filter box over all existing workspaces (substring on display/name/id)
+- Rows: `name · monitor · Nw`; focused workspace bolded; Enter/click activates
+- Typing a query that matches no *name* appends a `+ Create “…”` row:
+  activating it focuses `name:<query>`, creating the workspace
+- Esc clears the filter, then closes; Up/Down/Home-style selection via keys or
+  hover
 
-- Numbered chips 1–10 with upstream occupancy/focused styling
-- Compact truncated-name chips for known named workspaces (same remembered set
-  as cycling), appended per `namedAfterNumbers`
-- Occupancy via `workspace.toplevels.values.length`, focused via
-  `Hyprland.focusedWorkspace`
-- Activated from `shell.json` by replacing `omarchy.workspaces` with
-  `mark.workspace-switcher`
+## 7. Bar widget (v1 — shipped)
 
-## 9. Implementation sequencing (post-upgrade)
+Occupied-or-focused workspaces of the focused monitor as plain name chips,
+v3-waybar styling: unfocused at 0.5 opacity, focused bold at full opacity.
+Click focuses; wheel up/down cycles prev/next. Logic adapted from
+murdialthaf/omarchy-named-workspaces (MIT).
 
-1. Scaffold plugin dir + manifest; `rescanPlugins`; confirm registry loads it
-2. Verify `[V]` unknowns below using the hot-reload loop
-3. WorkspacesModel.js (sort/filter/cycle) → Panel Mode A → Mode B
-4. IPC: `cycle next|prev` (+ optional own target if needed)
-5. Widget.qml; swap into `shell.json`
-6. Rebind `S/N/P` in `bindings.lua`; retire scroll script; update tracker
+## 8. Phase 2 (not started)
 
-## 10. Known unknowns (`[V]` at implementation time)
-
-- Exact `Toplevel` property names (title / appId / workspace ref / monitor)
-- Dispatching from panel context: `Hyprland.dispatch()` availability vs the
-  injected helper used by built-ins (`root.bar.run("hyprctl …")`)
-- Full supported schema type list in PluginRegistry settings UI
-- Panel positioning/sizing API and multi-monitor anchoring
-- Whether `keepLoaded: true` is needed for instant re-summons
+- **Mode B — window picker**: Tab toggles rows of
+  `app class/icon · title · workspace · monitor`; activation focuses the
+  owning workspace then the window. Panel skeleton already hosts the mode
+  switch point.
+- Persist the named-workspace ordering across shell restarts
+  (~/.local/state/omarchy JSON, FileView pattern).
+- Per-instance settings schema (PluginRegistry settings UI) if knobs are
+  wanted: `maxChars`, `showMonitorBadges`, `closeOnActivate`.
