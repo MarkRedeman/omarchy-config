@@ -167,7 +167,9 @@ installed headers:
 ```bash
 hyprpm remove hy3
 hyprpm add https://github.com/outfoxxed/hy3 0f32517   # "fixup: chase 0.56.0"
-hyprpm enable hy3 && hyprpm reload -n
+hyprpm enable hy3
+hyprpm update                                         # registers the plugin with the Lua config;
+                                                      # without this hl.plugin.hy3 is nil
 ```
 
 `deploy.sh` pins the same revision via `HY3_REV`. Revisit when upstream adds
