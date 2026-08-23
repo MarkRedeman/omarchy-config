@@ -38,6 +38,11 @@ hl.config({
     -- Dim unfocused windows instead of using inactive_opacity
     dim_inactive = true,
     dim_strength = 0.1,
+
+    -- Dimming only kicks in while a special workspace is open, so the
+    -- scratchpad gets its overlay separation without costing anything the
+    -- rest of the time.
+    dim_special = 0.6,
   },
 
   binds = {
@@ -46,3 +51,23 @@ hl.config({
     workspace_back_and_forth = true,
   },
 })
+
+-- Give the scratchpad a Quake-console feel: a large outer gap floats it over
+-- the dimmed workspace, and it slides down into view and retracts back up.
+-- The inner gap and rounding are inherited from the appearance settings above,
+-- so the scratchpad otherwise matches every other window. Shadow and blur
+-- stay off globally (they cost GPU on every frame for almost no visual gain).
+hl.workspace_rule({
+  workspace = "special:scratchpad",
+  gaps_out = 40 + 4 * gap,
+  gaps_in = 2 * gap,
+})
+
+-- The base defaults set the combined specialWorkspace leaf to slidevert; turn
+-- it off so the directional In/Out slides below take over.
+hl.animation({ leaf = "specialWorkspace", enabled = false })
+-- The direction names the edge the offset is measured from, not where the
+-- workspace goes: "slide top" drops it down into view, and "slide bottom"
+-- retracts it back up the way a Quake console does.
+hl.animation({ leaf = "specialWorkspaceIn", enabled = true, speed = 3, bezier = "easeOutQuint", style = "slide top" })
+hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 2, bezier = "easeInOutCubic", style = "slide bottom" })

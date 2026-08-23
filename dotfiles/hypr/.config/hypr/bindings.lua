@@ -106,10 +106,17 @@ o.bind(
 -- Next/prev *existing* workspace scoped to the current monitor
 -- (multi-monitor safe). Script name kept for continuity; it is pure
 -- hyprctl/jq so it works on quattro unchanged.
--- Reclaimed from quattro: SUPER + S scratchpad (still on SUPER + grave),
--- SUPER + P pseudo window.
+-- Reclaimed from quattro: SUPER + S scratchpad, SUPER + P pseudo window.
+-- The scratchpad toggle moves to the Quake-style SUPER + grave (and
+-- SUPER + SHIFT + grave for "move window to scratchpad") below; SUPER + S is
+-- now the workspace selector.
 hl.unbind("SUPER + S")
 hl.unbind("SUPER + P")
+
+-- Scratchpad (Quake-style console). SUPER + ALT + S stays as the base move
+-- binding; these add the grave aliases.
+o.bind("SUPER + grave", "Toggle scratchpad", hl.dsp.workspace.toggle_special("scratchpad"))
+o.bind("SUPER + SHIFT + grave", "Move window to scratchpad", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
 
 -- Workspace navigation runs through the mark.workspace-switcher shell
 -- plugin: S toggles the switcher panel, N/P cycle existing workspaces of the
