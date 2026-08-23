@@ -38,6 +38,13 @@ usage() {
 key=$1
 value=$2
 
+# Re-sync the shell's Style (cornerRadius/gapsOut) after applying. The
+# mark.appearance panel owns a refresh() IPC that calls Style.refresh();
+# when the panel isn't loaded this is a harmless no-op.
+refresh_shell_style() {
+  omarchy-shell shell call mark.appearance refresh '' >/dev/null 2>&1 || true
+}
+
 # Tab radius follows the window rounding: half, capped at half the 22px tab
 # bar. Must match plugins.lua so live-apply and config reloads agree.
 tab_radius_for() {
@@ -59,6 +66,7 @@ gap)
   # hyprctl keyword is unavailable under the Lua config; hl.config via the
   # eval path is the sanctioned live-apply route.
   hyprctl eval "hl.config({ general = { gaps_in = $value, gaps_out = $outer, border_size = $border }, decoration = { rounding = $rounding }, plugin = { hy3 = { tabs = { radius = $(tab_radius_for) } } } })" >/dev/null
+  refresh_shell_style
   notify-send "Appearance" "Gaps: ${value}px (outer ${outer}px)" -t 1500
   ;;
 
@@ -67,6 +75,7 @@ rounding)
   (( value <= 128 )) || value=128
   write_state --argjson v "$value" '.rounding = $v'
   hyprctl eval "hl.config({ decoration = { rounding = $value }, plugin = { hy3 = { tabs = { radius = $(tab_radius_for) } } } })" >/dev/null
+  refresh_shell_style
   notify-send "Appearance" "Corner radius: ${value}px" -t 1500
   ;;
 

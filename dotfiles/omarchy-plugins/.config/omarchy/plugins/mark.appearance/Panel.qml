@@ -25,6 +25,11 @@ Item {
   property int gap: 0
   property int rounding: 0
 
+  // Set on every commit; onFileChanged ignores events within this window so
+  // the in-flight write can't echo a stale value back into the UI. A settle
+  // timer reloads afterwards to reconcile anything suppressed.
+  property real lastCommitAt: 0
+
   // Both sliders walk powers of two: 0 1 2 4 8 16 32 64 128. The slider is
   // index-based (0..stepCount-1); stepValue()/stepIndexFor() translate.
   readonly property var steps: [0, 1, 2, 4, 8, 16, 32, 64, 128]
@@ -108,11 +113,22 @@ Item {
 
   // -------------------------------------------------------- state files
 
+  function clampGap(v) {
+    return Math.min(Math.max(parseInt(v) || 0, 0), 128)
+  }
+
+  function clampRounding(v) {
+    return Math.min(Math.max(parseInt(v) || 0, 0), 128)
+  }
+
+  // Single reducer: the only place root.gap / root.rounding are written from
+  // the state file. External changes (keybind cycle, CLI) arrive here via
+  // FileView.onFileChanged; the UI derives from these two properties alone.
   function loadAppearance(blob) {
     try {
       var parsed = JSON.parse(blob || "{}")
-      root.gap = Math.min(Math.max(parseInt(parsed.gap || 0), 0), 128)
-      root.rounding = Math.min(Math.max(parseInt(parsed.rounding || 0), 0), 128)
+      root.gap = clampGap(parsed.gap)
+      root.rounding = clampRounding(parsed.rounding)
     } catch (e) { /* keep current values on malformed state */ }
   }
 
@@ -122,8 +138,38 @@ Item {
     watchChanges: true
     printErrors: false
     onLoaded: root.loadAppearance(text())
-    onFileChanged: root.loadAppearance(text())
+    onFileChanged: {
+      // Echoes of our own in-flight commit writes are suppressed; the settle
+      // timer reloads afterwards so nothing gets lost.
+      if (Date.now() - root.lastCommitAt < 400) return
+      root.loadAppearance(text())
+    }
     onLoadFailed: root.loadAppearance("")
+  }
+
+  // FileView.watchChanges turns out to be unreliable for external writes to
+  // this file (onFileChanged never fires), so watch it directly — the same
+  // inotifywait pattern PluginRegistry uses for the plugins directory.
+  Process {
+    id: appearanceWatcher
+    running: true
+    command: ["inotifywait", "-m", "-q", "-e", "modify,close_write,move,create",
+              "--format", "%e",
+              Quickshell.env("HOME") + "/.local/state/omarchy/appearance.json"]
+    stdout: SplitParser {
+      onRead: function(line) {
+        // Suppress echoes of our own in-flight commit writes.
+        if (Date.now() - root.lastCommitAt < 400) return
+        appearanceFile.reload()
+      }
+    }
+    onExited: appearanceWatcherRestart.restart()
+  }
+
+  Timer {
+    id: appearanceWatcherRestart
+    interval: 1000
+    onTriggered: appearanceWatcher.running = true
   }
 
   FileView {
@@ -139,6 +185,14 @@ Item {
         root.pendingTheme = ""
     }
     onLoadFailed: root.currentTheme = ""
+  }
+
+  // Reconcile anything suppressed during the post-commit window: the file is
+  // the source of truth, so a reload always lands on the real state.
+  Timer {
+    id: settleTimer
+    interval: 450
+    onTriggered: appearanceFile.reload()
   }
 
   // One image per theme lives flat in the upstream thumbnail cache;
@@ -181,6 +235,8 @@ Item {
       opened: root.opened,
       gap: root.gap,
       rounding: root.rounding,
+      shellRadius: Style.cornerRadius,
+      shellGapsOut: Style.gapsOut,
       theme: root.currentTheme,
       pendingTheme: root.pendingTheme,
       openPanels: Object.keys((root.shell && root.shell.openPanelIds) || {})
@@ -189,14 +245,44 @@ Item {
 
   // --------------------------------------------------------------- IPC
 
+  // Single write path: update in-memory state synchronously (UI derives from
+  // it — instant, correct highlight/knob), then let the script persist (it
+  // writes the file IN PLACE, so the FileView watch survives) and apply the
+  // live side effect.
+  function commitAppearance(partial) {
+    var next = { gap: root.gap, rounding: root.rounding }
+    for (var key in partial) next[key] = partial[key]
+    root.gap = clampGap(next.gap)
+    root.rounding = clampRounding(next.rounding)
+    root.lastCommitAt = Date.now()
+    settleTimer.restart()
+    styleRefreshTimer.restart()
+    if ("gap" in partial) Util.execDetached("omarchy-appearance-set gap " + root.gap)
+    if ("rounding" in partial) Util.execDetached("omarchy-appearance-set rounding " + root.rounding)
+  }
+
   function setGap(value) {
-    Util.execDetached("omarchy-appearance-set gap " + value)
-    root.gap = value
+    commitAppearance({ gap: clampGap(value) })
   }
 
   function setRounding(value) {
-    Util.execDetached("omarchy-appearance-set rounding " + Math.round(value))
-    root.rounding = Math.round(value)
+    commitAppearance({ rounding: clampRounding(value) })
+  }
+
+  // Re-sync the shell's Style (cornerRadius + gapsOut) from Hyprland after
+  // the live apply has landed, so notifications/panels follow the change.
+  // The Style singleton mirrors Hyprland's decoration:rounding /
+  // general:gaps_out but only re-reads them on startup or after theme IPC.
+  Timer {
+    id: styleRefreshTimer
+    interval: 500
+    onTriggered: Style.refresh()
+  }
+
+  // IPC entry so omarchy-appearance-set can trigger the same refresh when
+  // invoked outside the panel (keybind cycle / CLI).
+  function refresh() {
+    Style.refresh()
   }
 
   function applyPendingTheme() {
@@ -229,6 +315,7 @@ Item {
     }
 
     root.opened = true
+    appearanceFile.reload() // pick up changes made while the panel was closed
     refreshThemes()
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
   }
@@ -464,7 +551,7 @@ Item {
             }
 
             Rectangle {
-              anchors { left: parent.left; top: parent.left; margins: Style.space(8) }
+              anchors { left: parent.left; top: parent.top; margins: Style.space(8) }
               width: badgeLabel.implicitWidth + Style.space(12)
               height: Style.space(22)
               radius: Style.space(11)
