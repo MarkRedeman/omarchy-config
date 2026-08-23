@@ -1,0 +1,22 @@
+#!/bin/bash
+# omarchy:summary=Cycle the gap size through the panel presets (i3 -> comfort -> wide)
+# omarchy:examples=omarchy-appearance-cycle
+
+set -euo pipefail
+
+STATE="$HOME/.local/state/omarchy/appearance.json"
+
+current=0
+if [[ -f $STATE ]]; then
+  current=$(jq -r '.gap // 0' "$STATE")
+fi
+
+# Panel presets: i3=0, Comfort=4, Wide=8.
+next=0
+if (( current < 4 )); then
+  next=4
+elif (( current < 8 )); then
+  next=8
+fi
+
+exec omarchy-appearance-set gap "$next"

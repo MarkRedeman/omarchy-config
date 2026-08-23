@@ -1,22 +1,40 @@
 -- Change the default Omarchy look'n'feel.
 -- See https://wiki.hyprland.org/Configuring/Basics/Variables/
+--
+-- Appearance is state-driven: gap size + corner rounding live in
+-- ~/.local/state/omarchy/appearance.json, written by the mark.appearance
+-- panel and the omarchy-appearance-* scripts. Missing file = i3-style zeros.
+--
+--   "gap"      - inner gap in px (outer gap = 2x). 0 = i3-style zeros.
+--   "rounding" - corner radius in px (0-128).
+-- The panel's sliders step through powers of two: 0 1 2 4 8 16 32 64 128.
 
--- hy3 provides the i3/sway-style manual tiling layout. If the plugin is not
--- loaded (build failure after a Hyprland update, etc.) flip this to false so
--- the session falls back to the built-in dwindle layout.
 local USE_HY3 = true
+
+local gap, rounding = 0, 0
+do
+  local path = (os.getenv("HOME") or "") .. "/.local/state/omarchy/appearance.json"
+  local file = io.open(path, "r")
+  if file then
+    local blob = file:read("*a")
+    file:close()
+    gap = math.min(tonumber(blob:match('"gap"%s*:%s*(%d+)') or 0), 128)
+    rounding = math.min(tonumber(blob:match('"rounding"%s*:%s*(%d+)') or 0), 128)
+  end
+end
 
 hl.config({
   general = {
-    -- No gaps between windows or borders
-    gaps_in = 0,
-    gaps_out = 0,
-    border_size = 0,
-
     layout = USE_HY3 and "hy3" or "dwindle",
+
+    gaps_in = gap,
+    gaps_out = gap * 2,
+    border_size = gap > 0 and 2 or 0,
   },
 
   decoration = {
+    rounding = rounding,
+
     -- Dim unfocused windows instead of using inactive_opacity
     dim_inactive = true,
     dim_strength = 0.1,

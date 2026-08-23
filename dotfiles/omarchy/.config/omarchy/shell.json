@@ -6,7 +6,7 @@
   },
   "bar": {
     "position": "top",
-    "transparent": false,
+    "transparent": true,
     "centerAnchor": "omarchy.clock",
     "layout": {
       "left": [
@@ -57,5 +57,9 @@
       ]
     }
   },
-  "plugins": []
+  "plugins": [
+    {
+      "id": "mark.appearance"
+    }
+  ]
 }

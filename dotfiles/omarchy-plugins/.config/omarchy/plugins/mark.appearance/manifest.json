@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "mark.appearance",
+  "name": "Appearance",
+  "version": "0.1.0",
+  "author": "Mark Redeman",
+  "license": "MIT",
+  "description": "Gap comfort levels, corner rounding slider, and a theme picker with live preview",
+  "keepLoaded": true,
+  "kinds": [
+    "panel"
+  ],
+  "entryPoints": {
+    "panel": "Panel.qml"
+  }
+}

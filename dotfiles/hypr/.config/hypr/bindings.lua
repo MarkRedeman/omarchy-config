@@ -207,6 +207,11 @@ o.bind("SUPER + ALT + D", "Docker", { tui = "lazydocker" })
 -- Clipboard manager (quattro's default panel toggle stays on SUPER+CTRL+V)
 o.bind("SUPER + ALT + V", "Clipboard manager", "omarchy-shell shell toggle omarchy.clipboard")
 
+-- Appearance: gap comfort cycle (i3 -> stock -> wide) and the appearance
+-- panel (comfort, corner radius slider, theme picker).
+o.bind("SUPER + CTRL + G", "Cycle gap comfort", "omarchy-appearance-cycle")
+o.bind("SUPER + ALT + A", "Appearance settings", "omarchy-shell shell toggle mark.appearance")
+
 -- =============================================================================
 -- Menus & system
 -- =============================================================================
