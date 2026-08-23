@@ -107,7 +107,14 @@ Item {
   }
 
   function close() {
+    if (!root.opened) return
     root.opened = false
+    // Route through the host so openPanelIds stays consistent (the
+    // reentrant close() from hide() is a no-op thanks to the guard above).
+    var self = root.manifest && root.manifest.id ? String(root.manifest.id) : ""
+    if (self && root.shell && typeof root.shell.hide === "function") {
+      try { root.shell.hide(self) } catch (e) { }
+    }
   }
 
   function toggle() {
@@ -120,6 +127,42 @@ Item {
   function initialSelection() {
     var index = WorkspacesModel.indexOfFocused(matchedRecords, Hyprland.focusedWorkspace)
     return index === -1 ? 0 : index
+  }
+
+  // Bidirectional launcher exclusivity: open() dismisses our siblings, and
+  // this watcher handles the reverse direction — if another panel is
+  // summoned while we are up (menu, app picker, clipboard, …), step aside.
+  // The host keeps no exclusivity of its own, so each side must yield.
+  Connections {
+    target: root.shell
+
+    function onOpenPanelIdsChanged() {
+      if (!root.opened || !root.shell) return
+      var self = root.manifest && root.manifest.id ? String(root.manifest.id) : ""
+      var ids = root.shell.openPanelIds || {}
+      for (var id in ids) {
+        if (id !== self) {
+          // Hide through the host (not a local close()) so openPanelIds
+          // stays consistent — the reentrant callback is a no-op because
+          // opened is false by the time it lands.
+          try { root.shell.hide(self) } catch (e) { root.close() }
+          return
+        }
+      }
+    }
+  }
+
+  // Debug/state probe: `omarchy-shell shell call mark.workspace-switcher status ''`
+  function status() {
+    return JSON.stringify({
+      v: 3,
+      opened: root.opened,
+      filter: root.filterText,
+      rows: root.rowCount,
+      selected: root.selectedIndex,
+      keyFocus: keyCatcher.activeFocus,
+      openPanels: Object.keys((root.shell && root.shell.openPanelIds) || {})
+    })
   }
 
   // ------------------------------------------------------------ actions
@@ -205,13 +248,42 @@ Item {
 
       MouseArea { anchors.fill: parent; onClicked: {} }
 
-      Column {
+      Item {
+        id: keyCatcher
         anchors.fill: parent
-        anchors.topMargin: card.contentTopInset
-        anchors.rightMargin: card.contentRightInset
-        anchors.bottomMargin: card.contentBottomInset
-        anchors.leftMargin: card.contentLeftInset
-        spacing: root.contentSpacing
+        focus: true
+
+        Keys.priority: Keys.BeforeItem
+        Keys.onPressed: function(event) {
+          if (event.key === Qt.Key_Escape) {
+            if (root.filterText) root.setFilter("")
+            else root.close()
+            event.accepted = true
+          } else if (Util.editsFilter(event, root.filterText)) {
+            root.setFilter(Util.editedFilter(event, root.filterText))
+            event.accepted = true
+          } else if (event.key === Qt.Key_Up) {
+            root.select(-1)
+            event.accepted = true
+          } else if (event.key === Qt.Key_Down) {
+            root.select(1)
+            event.accepted = true
+          } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            root.activateIndex(root.selectedIndex)
+            event.accepted = true
+          } else if (event.text && event.text.length === 1 && event.text.charCodeAt(0) >= 32 && event.text.charCodeAt(0) !== 127) {
+            root.setFilter(root.filterText + event.text)
+            event.accepted = true
+          }
+        }
+
+        Column {
+          anchors.fill: parent
+          anchors.topMargin: card.contentTopInset
+          anchors.rightMargin: card.contentRightInset
+          anchors.bottomMargin: card.contentBottomInset
+          anchors.leftMargin: card.contentLeftInset
+          spacing: root.contentSpacing
 
         // Filter line: typed query with blinking block-cursor.
         Item {
@@ -345,6 +417,7 @@ Item {
                 font.italic: true
               }
             }
+          }
           }
         }
       }

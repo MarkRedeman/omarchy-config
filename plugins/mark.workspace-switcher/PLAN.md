@@ -92,8 +92,12 @@ parser).
 - Rows: `name · monitor · Nw`; focused workspace bolded; Enter/click activates
 - Typing a query that matches no *name* appends a `+ Create “…”` row:
   activating it focuses `name:<query>`, creating the workspace
-- Esc clears the filter, then closes; Up/Down/Home-style selection via keys or
-  hover
+- Esc clears the filter, then closes; Up/Down selection via keys or hover
+- **Launcher exclusivity is bidirectional and plugin-owned**: the shell keeps
+  no exclusivity for loader-hosted panels, so `open()` dismisses every other
+  entry in `shell.openPanelIds`, and a watcher closes us whenever another
+  panel id appears while we are open. Covers the omarchy menu / app picker /
+  clipboard stack; external (non-shell) launchers are out of reach by design.
 
 ## 7. Bar widget (v1 — shipped)
 
