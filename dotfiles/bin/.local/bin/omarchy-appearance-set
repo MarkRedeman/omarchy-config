@@ -38,6 +38,14 @@ usage() {
 key=$1
 value=$2
 
+# Tab radius follows the window rounding: half, capped at half the 22px tab
+# bar. Must match plugins.lua so live-apply and config reloads agree.
+tab_radius_for() {
+  local r=$((value / 2))
+  (( r > 11 )) && r=11
+  echo "$r"
+}
+
 case $key in
 gap)
   [[ $value =~ ^[0-9]+$ ]] || usage
@@ -47,12 +55,10 @@ gap)
   outer=$((value * 2))
   border=0
   (( value > 0 )) && border=2
+  rounding=$(jq -r '.rounding // 0' "$STATE")
   # hyprctl keyword is unavailable under the Lua config; hl.config via the
   # eval path is the sanctioned live-apply route.
-  hyprctl eval "hl.config({ general = { gaps_in = $value, gaps_out = $outer, border_size = $border } })" >/dev/null
-
-  rounding=$(jq -r '.rounding // 0' "$STATE")
-  hyprctl eval "hl.config({ decoration = { rounding = $rounding } })" >/dev/null
+  hyprctl eval "hl.config({ general = { gaps_in = $value, gaps_out = $outer, border_size = $border }, decoration = { rounding = $rounding }, plugin = { hy3 = { tabs = { radius = $(tab_radius_for) } } } })" >/dev/null
   notify-send "Appearance" "Gaps: ${value}px (outer ${outer}px)" -t 1500
   ;;
 
@@ -60,7 +66,7 @@ rounding)
   [[ $value =~ ^[0-9]+$ ]] || usage
   (( value <= 128 )) || value=128
   write_state --argjson v "$value" '.rounding = $v'
-  hyprctl eval "hl.config({ decoration = { rounding = $value } })" >/dev/null
+  hyprctl eval "hl.config({ decoration = { rounding = $value }, plugin = { hy3 = { tabs = { radius = $(tab_radius_for) } } } })" >/dev/null
   notify-send "Appearance" "Corner radius: ${value}px" -t 1500
   ;;
 

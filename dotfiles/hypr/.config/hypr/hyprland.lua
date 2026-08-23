@@ -11,6 +11,7 @@ require("hypr.monitors")
 require("hypr.input")
 require("hypr.bindings")
 require("hypr.looknfeel")
+require("hypr.plugins")
 require("hypr.autostart")
 
 -- Make Emacs fully opaque (override the default ~98% window opacity).
