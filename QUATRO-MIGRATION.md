@@ -151,6 +151,29 @@ version (`hl{version}`); `hyprpm` builds against the installed Hyprland.
 Install (unchanged from v3): base-devel/git/cmake/pkgconf/cpio +
 `hyprpm add https://github.com/outfoxxed/hy3` + `exec-once = hyprpm reload -n`.
 
+### 3.1 Resolved: build failure on Hyprland 0.56.2
+
+The first `hyprpm add` on the quattro machine failed: hy3's manifest had no
+commit pin for 0.56.x patch releases (only `0.56.0`), so hyprpm fell back to
+building master, whose "chase git" commits expect git-master header paths
+(`desktop/view/window/Window.hpp`) that don't exist in the installed 0.56.2
+headers (`desktop/view/Window.hpp`) — every translation unit died with
+`fatal error: … No such file or directory`.
+
+Fix (applied 2026-08-23): rev-lock the install to the last commit targeting
+the 0.56 release API — verified to compile cleanly against the exact
+installed headers:
+
+```bash
+hyprpm remove hy3
+hyprpm add https://github.com/outfoxxed/hy3 0f32517   # "fixup: chase 0.56.0"
+hyprpm enable hy3 && hyprpm reload -n
+```
+
+`deploy.sh` pins the same revision via `HY3_REV`. Revisit when upstream adds
+a pin/tag for the running Hyprland version (tracked upstream in
+[outfoxxed/hy3#324](https://github.com/outfoxxed/hy3/issues/324)).
+
 Binding translation map (old → new):
 
 ```lua
@@ -166,9 +189,9 @@ local hy3 = hl.plugin.hy3
 
 Open questions:
 
-- [V] Which Hyprland build does the `[omarchy]` quattro repo ship (tagged vs
-  git)? hyprpm resolves automatically for tagged builds; for `-git` builds it
-  picks latest hy3 commit.
+- [x] Which Hyprland build does the `[omarchy]` quattro repo ship (tagged vs
+  git)? → tagged (`v0.56.2` on 2026-08-23); see §3.1 for the pin gap this
+  exposed.
 - [V] Plugin *config block* syntax under the Lua parser (tab colors/height
   styling from old `plugins.conf`). If unresolved: ship defaults, restyle later.
 - Fallback: `looknfeel.lua` keeps a `USE_HY3` flag switching

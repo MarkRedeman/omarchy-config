@@ -40,11 +40,21 @@ fi
 echo "Checking for hy3 dependencies..."
 omarchy-pkg-add base-devel git cmake pkgconf cpio
 
-# Install hy3 plugin via hyprpm
+# Install hy3 plugin via hyprpm.
+# HY3_REV is pinned because hy3's manifest has no commit pin for the installed
+# Hyprland release yet: unpinned builds use master, which targets Hyprland
+# git-master headers and fails to compile (see https://github.com/outfoxxed/hy3/issues/324).
+# Bump/remove once upstream pins or tags a hy3 for the running Hyprland version.
+HY3_REV="0f32517"
 echo "Setting up hy3 plugin..."
 if command -v hyprpm &> /dev/null; then
     hyprpm update
-    hyprpm add https://github.com/outfoxxed/hy3 2>/dev/null || true
+    if ! hyprpm add "https://github.com/outfoxxed/hy3" "$HY3_REV"; then
+        # Repository already present (wrong rev, or left in a failed state):
+        # reinstall at the pinned rev so the build is reproducible.
+        hyprpm remove hy3
+        hyprpm add "https://github.com/outfoxxed/hy3" "$HY3_REV"
+    fi
     hyprpm enable hy3
 else
     echo "Error: hyprpm is not available. See https://wiki.hyprland.org/Plugins/Using-Plugins/"
