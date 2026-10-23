@@ -11,3 +11,6 @@ uv = "latest"
 
 [settings]
 disable_tools = ["python"]
+
+[settings.upgrade]
+auto_prune = false
