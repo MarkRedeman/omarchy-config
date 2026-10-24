@@ -14,5 +14,11 @@ require("hypr.looknfeel")
 require("hypr.plugins")
 require("hypr.autostart")
 
+-- Window opacity, pinned here instead of inherited from Omarchy's defaults so
+-- a fresh deploy matches this machine. Every window gets the default-opacity
+-- tag upstream; apps that should stay opaque drop the tag instead of setting
+-- their own opacity (see Emacs below).
+o.window({ tag = "default-opacity" }, { opacity = "0.985 0.96" })
+
 -- Make Emacs fully opaque (override the default ~98% window opacity).
 o.window("^(emacs)$", { tag = "-default-opacity", opacity = "1 1" })

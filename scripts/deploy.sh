@@ -75,8 +75,24 @@ for package in "$DOTFILES_DIR"/*/; do
 done
 git -C "$REPO_DIR" checkout -- "$DOTFILES_DIR"
 
-# Theme: stock quattro themes are used (custom Aether theme was discarded;
-# see QUATRO-MIGRATION.md §4.3).
+# Appearance state: gaps and corner radius live under ~/.local/state, so stow
+# cannot manage them. looknfeel.lua reads this file on every config load and
+# falls back to i3-style zeros when it is missing; seed it on a fresh machine
+# so a deploy reproduces this setup instead of silently losing it.
+APPEARANCE_STATE="$HOME/.local/state/omarchy/appearance.json"
+if [[ ! -f "$APPEARANCE_STATE" ]]; then
+    echo "Seeding appearance state (gap 4, rounding 8)..."
+    mkdir -p "$(dirname "$APPEARANCE_STATE")"
+    cp "$REPO_DIR/scripts/appearance.default.json" "$APPEARANCE_STATE"
+
+    # Fresh machine: start from the stock theme these dotfiles are tuned for
+    # (ethereal). Only on first deploy, so a later theme choice is not reset.
+    # Best effort: a deploy may run outside a graphical session.
+    if command -v omarchy-theme-set >/dev/null 2>&1; then
+        echo "Applying default theme: ethereal"
+        omarchy-theme-set ethereal || echo "Warning: could not apply theme ethereal; run 'omarchy-theme-set ethereal' after logging in."
+    fi
+fi
 
 # Install fish shell with omarchy-fish (provides functions, fzf.fish, starship init)
 # Uses bash auto-launch approach instead of chsh to avoid black screen on boot

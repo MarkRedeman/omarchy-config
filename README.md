@@ -6,6 +6,9 @@ Personal [Omarchy](https://omarchy.org) (Hyprland) dotfiles with [hy3](https://g
 > This branch (`quatro`) targets Omarchy quattro only: Hyprland Lua config,
 > Quickshell shell, no custom theme. The legacy v3 layout lives on the
 > `mark/oma-dots` branch.
+>
+> Reproducing theme, gaps, corner radius, opacity, and the bar widget:
+> see [handoff-looknfeel.md](handoff-looknfeel.md).
 
 ## Install
 
