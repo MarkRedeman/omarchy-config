@@ -348,11 +348,18 @@ back to `outfoxxed/hy3` on 2026-10-23. Prefer upstream.
 | Build fails after a Hyprland bump | hy3 revision doesn't support the new Hyprland yet | Check upstream for a new pin/tag; wait, pin a compatible rev, or temporarily disable hy3 |
 | `hyprpm add` → `Repository already installed` | Repo name (`hy3`) already exists | `hyprpm remove hy3`, then add again |
 | `Don't run hyprpm as a superuser.` | Ran with `sudo` | Run as your user; let hyprpm call sudo |
+| hy3 binds (`SUPER+HJKL`, move window, tab groups) do nothing on one workspace, while built-in `hl.dsp.focus` still works | Omarchy saved a per-workspace layout (`scrolling`/`dwindle`) in `~/.local/state/omarchy/workspace-layouts/<id>.lua`; it overrides `general:layout`, so hy3 isn't managing that workspace | Delete the file and `hyprctl reload` (or switch that workspace back to hy3 from the menu) |
 
 ### Notes
 
 - `hyprpm update` = update headers + rebuild all repos; `hyprpm reload` = only
   load/unload what is enabled; `hyprctl reload` = config only.
+- Omarchy's workspace-layout toggle (`omarchy-hyprland-workspace-layout-toggle`,
+  stock `SUPER+L`, or the menu) persists a
+  `~/.local/state/omarchy/workspace-layouts/<id>.lua` override. `hyprland.lua`
+  requires `default.hypr.toggles`, which replays those overrides on every load,
+  so one accidental toggle keeps hy3 disabled for that workspace across reboots.
+  Our `bindings.lua` reclaims `SUPER+L`, but the menu can still toggle it.
 - `hyprpm update -f` forces a headers rebuild even if hyprpm thinks they are
   current. Useful after weird states.
 - `hyprpm purge-cache` deletes the whole hyprpm cache (headers, built plugins,
