@@ -15,5 +15,13 @@ hl.config({
 
     repeat_rate = 40,
     repeat_delay = 600,
+
+    -- Omarchy defaults to clickfinger_behavior = true (2-finger press = right
+    -- click), which drops the bottom-right button area. Button areas give the
+    -- corner press back; two-finger *tap* still right-clicks because
+    -- tap-to-click maps by finger count regardless of click method.
+    touchpad = {
+      clickfinger_behavior = false,
+    },
   },
 })
