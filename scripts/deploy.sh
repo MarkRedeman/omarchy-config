@@ -48,7 +48,9 @@ omarchy-pkg-add base-devel git cmake pkgconf cpio
 HY3_REV="0f32517"
 echo "Setting up hy3 plugin..."
 if command -v hyprpm &> /dev/null; then
-    hyprpm update
+    # Best-effort refresh. A failing build here (typically an unpinned master
+    # that does not match the installed headers) is redone at HY3_REV below.
+    hyprpm update || true
     if ! hyprpm add "https://github.com/outfoxxed/hy3" "$HY3_REV"; then
         # Repository already present (wrong rev, or left in a failed state):
         # reinstall at the pinned rev so the build is reproducible.
