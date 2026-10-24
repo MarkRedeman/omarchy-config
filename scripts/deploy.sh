@@ -56,6 +56,12 @@ if command -v hyprpm &> /dev/null; then
         hyprpm add "https://github.com/outfoxxed/hy3" "$HY3_REV"
     fi
     hyprpm enable hy3
+    # Register the (re)built plugin with the Lua config. Until hyprpm has
+    # written its load state after the enable, hl.plugin.hy3 is nil and every
+    # hy3 binding fails to parse. reload is best-effort so an over-SSH run
+    # still completes.
+    hyprpm update
+    hyprpm reload -n || true
 else
     echo "Error: hyprpm is not available. See https://wiki.hyprland.org/Plugins/Using-Plugins/"
     exit 1

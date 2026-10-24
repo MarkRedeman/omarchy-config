@@ -14,5 +14,8 @@ require("hypr.looknfeel")
 require("hypr.plugins")
 require("hypr.autostart")
 
+-- State-driven toggles (touchpad/touchscreen, workspace layouts, flags).
+require("default.hypr.toggles")
+
 -- Make Emacs fully opaque (override the default ~98% window opacity).
 o.window("^(emacs)$", { tag = "-default-opacity", opacity = "1 1" })

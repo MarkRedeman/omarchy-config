@@ -6,3 +6,6 @@ dotfiles/ssh/.ssh/*
 
 dotfiles/gnupg/.gnupg/*
 !dotfiles/gnupg/.gnupg/gpg-agent.conf
+
+# Fish writes its variable store into the stowed dir (folding); never commit it
+dotfiles/fish/.config/fish/fish_variables
