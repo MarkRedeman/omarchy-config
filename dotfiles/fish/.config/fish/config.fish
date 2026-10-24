@@ -30,5 +30,5 @@ set -gx http_proxy http://localhost:3128
 set -gx HTTP_PROXY http://localhost:3128
 set -gx https_proxy http://localhost:3128
 set -gx HTTPS_PROXY http://localhost:3128
-set -gx no_proxy localhost,127.0.0.0/8,::1
-set -gx NO_PROXY localhost,127.0.0.0/8,::1
+set -gx no_proxy localhost,127.0.0.1,127.0.0.0/8,::1
+set -gx NO_PROXY localhost,127.0.0.1,127.0.0.0/8,::1
