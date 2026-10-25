@@ -134,9 +134,9 @@ BarWidget {
 
   readonly property string chevronIcon: {
     if (chevronOnLeft) {
-      return expanded ? "󰅁" : "󰅂"
-    } else {
       return expanded ? "󰅂" : "󰅁"
+    } else {
+      return expanded ? "󰅁" : "󰅂"
     }
   }
 
