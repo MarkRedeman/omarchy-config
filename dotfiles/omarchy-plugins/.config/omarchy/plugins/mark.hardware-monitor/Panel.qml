@@ -114,22 +114,13 @@ Panel {
   }
 
   function tooltipText() {
-    var lines = []
-    lines.push("CPU " + Model.formatPercent(snapshot.cpu.utilization) +
-      (snapshot.cpu.frequency >= 0 ? " · " + Model.formatMHz(snapshot.cpu.frequency) : ""))
-    if (hasGpu)
-      lines.push("GPU " + Model.formatPercent(snapshot.gpu.utilization) +
-        (snapshot.gpu.engines.length > 0 ? " · " + snapshot.gpu.engines.length + " engines" : ""))
-    if (hasNpu)
-      lines.push("NPU " + Model.formatPercent(snapshot.npu.utilization))
-    if (snapshot.cpu.power >= 0)
-      lines.push("Package " + Model.formatWatts(snapshot.cpu.power))
-    lines.push(metrics.status === "online" && !metrics.stale
-      ? "TopsWatch · updated " + ageText()
-      : "TopsWatch offline · click for details")
-    lines.push("Click for details · Right-click web UI · Middle-click btop")
-    return lines.join("\n")
+    return "CPU " + Model.formatPercent(snapshot.cpu.utilization) +
+      " · GPU " + Model.formatPercent(snapshot.gpu.utilization) +
+      " · NPU " + Model.formatPercent(snapshot.npu.utilization) +
+      " · MEM " + Model.formatPercent(snapshot.cpu.memoryPercent) +
+      " · PWR " + root.powerTileValue()
   }
+
 
   BarIconButton {
     id: barButton
@@ -817,14 +808,6 @@ Panel {
                 hoverColor: root.accent
                 fontFamily: root.fontFamily
                 onClicked: root.openWebUI()
-              }
-              PanelActionButton {
-                iconText: "󰆍"
-                tooltipText: "Open btop (B)"
-                foreground: root.foreground
-                hoverColor: root.accent
-                fontFamily: root.fontFamily
-                onClicked: root.launchBtop()
               }
             }
           }

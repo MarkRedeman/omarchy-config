@@ -23,12 +23,12 @@ source can be added without touching the panel.
 | History | — | 1-hour CPU/GPU/NPU utilization chart; the card dots are the legend |
 | Health | stale/offline tooltip | TopsWatch warnings and a stale/offline banner |
 
-The bar is a single chip icon; its tooltip carries the CPU/GPU/NPU and package
-numbers. Left-click opens the panel, right-click opens the TopsWatch web UI,
-and middle-click opens btop. The CPU/GPU/NPU summary cards sit side by side at
-the top of the panel, followed by the memory/power cards and the 1-hour graph.
-Clicking a toggleable card (or pressing `C`, `G`, `N`, `P`) expands its
-full-width detail section below the summary rows.
+The bar is a single chip icon; its tooltip is a single line with CPU/GPU/NPU
+utilization, memory, and power. Left-click opens the panel, right-click opens
+the TopsWatch web UI, and middle-click opens btop. The CPU/GPU/NPU summary cards
+sit side by side at the top of the panel, followed by the memory/power cards
+and the 1-hour graph. Clicking a toggleable card (or pressing `C`, `G`, `N`,
+`P`) expands its full-width detail section below the summary rows.
 
 ## Requirements
 
