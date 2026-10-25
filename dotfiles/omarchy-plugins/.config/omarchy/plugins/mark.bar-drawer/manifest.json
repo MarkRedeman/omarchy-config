@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "mark.bar-drawer",
+  "name": "Bar Drawer",
+  "version": "0.1.0",
+  "author": "Mark Redeman",
+  "license": "MIT",
+  "description": "Fold secondary Omarchy bar widgets into a hover chevron drawer.",
+  "kinds": [
+    "bar-widget",
+    "service"
+  ],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "Panel.qml",
+    "service": "Service.qml"
+  },
+  "barWidget": {
+    "displayName": "Bar Drawer",
+    "description": "A chevron that reveals secondary bar widgets on hover.",
+    "category": "Appearance",
+    "aliases": [
+      "drawer",
+      "overflow",
+      "chevron"
+    ],
+    "defaultSection": "right",
+    "allowMultiple": false,
+    "defaults": {
+      "items": [
+        "io.github.kristoferlund.webcam",
+        "mark.hardware-monitor",
+        "omarchy.bluetooth",
+        "omarchy.tailscale",
+        "omarchy.audio",
+        "omarchy.monitor"
+      ],
+      "defaultExpanded": "Off",
+      "expandOnHover": "On",
+      "collapseDelay": 300,
+      "chevronPosition": "left",
+      "animationDuration": 300
+    },
+    "schema": [
+      {
+        "key": "chevronPosition",
+        "type": "enum",
+        "label": "Chevron position",
+        "options": [
+          "left",
+          "right"
+        ],
+        "defaultValue": "left"
+      },
+      {
+        "key": "expandOnHover",
+        "type": "enum",
+        "label": "Expand on hover",
+        "options": [
+          "On",
+          "Off"
+        ],
+        "defaultValue": "On"
+      },
+      {
+        "key": "collapseDelay",
+        "type": "integer",
+        "label": "Collapse delay (ms)",
+        "min": 0,
+        "max": 2000,
+        "step": 50,
+        "defaultValue": 300
+      },
+      {
+        "key": "animationDuration",
+        "type": "integer",
+        "label": "Animation duration (ms)",
+        "min": 50,
+        "max": 2000,
+        "step": 50,
+        "defaultValue": 300
+      },
+      {
+        "key": "defaultExpanded",
+        "type": "enum",
+        "label": "Start expanded",
+        "options": [
+          "On",
+          "Off"
+        ],
+        "defaultValue": "Off"
+      }
+    ]
+  }
+}

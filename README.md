@@ -70,6 +70,15 @@ Install the daemon once:
 Then stow/rescan/enable the plugin as described in
 [its README](dotfiles/omarchy-plugins/.config/omarchy/plugins/mark.hardware-monitor/README.md).
 
+## Bar drawer
+
+The right side of the bar uses `mark.bar-drawer` to fold secondary widgets —
+webcam, hardware monitor, Bluetooth, Tailscale, audio, and display — behind a
+chevron that expands on hover. See
+[its README](dotfiles/omarchy-plugins/.config/omarchy/plugins/mark.bar-drawer/README.md).
+The webcam entry expects the `io.github.kristoferlund.webcam` plugin
+(`omarchy plugin add https://github.com/kristoferlund/omarchy-webcam.git`).
+
 ## Updating
 
 Edit files under `dotfiles/`, then re-stow:
