@@ -302,13 +302,68 @@ function normalizeSample(sample) {
 // ---------------------------------------------------------------- history
 
 function appendPoint(list, value, time, cap) {
-  var limit = cap === undefined ? 240 : cap
+  var limit = cap === undefined ? 4000 : cap
   var number = Number(value)
   if (!isFinite(number) || number < 0) return list
-  var next = Array.isArray(list) ? list.slice() : []
-  next.push({ time: Number(time), value: number })
+  var next = asArray(list).slice()
+  var stamp = Number(time)
+  if (!isFinite(stamp)) return next
+  var last = next.length > 0 ? next[next.length - 1] : null
+  if (last && stamp <= Number(last.time)) {
+    if (stamp === Number(last.time)) next[next.length - 1] = { time: stamp, value: number }
+    return next
+  }
+  next.push({ time: stamp, value: number })
   if (next.length > limit) next = next.slice(next.length - limit)
   return next
+}
+
+// Extract one metric's time series from TopsWatch's
+// /api/metrics/history?range=1h response (an array of ReducedSample).
+function historyPoints(samples, moduleName, metricName) {
+  var list = asArray(samples)
+  var out = []
+  for (var i = 0; i < list.length; i++) {
+    var sample = list[i]
+    if (!sample || !sample.metrics) continue
+    var value = metricValue(sample.metrics, moduleName, metricName)
+    if (value < 0) continue
+    var time = Date.parse(String(sample.timestamp || ""))
+    if (!isFinite(time)) continue
+    out.push({ time: time, value: value })
+  }
+  return out
+}
+
+// Union of the history backfill and live samples. Live values win on a
+// duplicate timestamp so the freshest sample is the one drawn.
+function mergeHistory(base, live, cutoff, cap) {
+  var limit = cap === undefined ? 4000 : cap
+  var byTime = {}
+  var order = []
+
+  function add(list) {
+    var points = asArray(list)
+    for (var i = 0; i < points.length; i++) {
+      var point = points[i]
+      var time = Number(point.time)
+      var value = Number(point.value)
+      if (!isFinite(time) || !isFinite(value) || value < 0) continue
+      if (cutoff !== undefined && time < Number(cutoff)) continue
+      if (byTime[time] === undefined) order.push(time)
+      byTime[time] = value
+    }
+  }
+
+  add(base)
+  add(live)
+  order.sort(function(a, b) { return a - b })
+
+  var out = []
+  for (var j = 0; j < order.length; j++)
+    out.push({ time: order[j], value: byTime[order[j]] })
+  if (out.length > limit) out = out.slice(out.length - limit)
+  return out
 }
 
 // ---------------------------------------------------------------- formatting
@@ -426,6 +481,8 @@ if (typeof module !== "undefined" && module.exports) {
     emptySnapshot: emptySnapshot,
     normalizeSample: normalizeSample,
     appendPoint: appendPoint,
+    historyPoints: historyPoints,
+    mergeHistory: mergeHistory,
     formatPercent: formatPercent,
     formatMHz: formatMHz,
     formatWatts: formatWatts,

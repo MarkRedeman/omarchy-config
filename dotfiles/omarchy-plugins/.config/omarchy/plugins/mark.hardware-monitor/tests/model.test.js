@@ -84,6 +84,34 @@ test("appendPoint caps history and ignores missing values", () => {
   assert.deepEqual(Model.appendPoint(list, -1, 4, 2), list)
 })
 
+test("appendPoint replaces a duplicate timestamp", () => {
+  let list = Model.appendPoint([], 10, 1000, 10)
+  list = Model.appendPoint(list, 12, 1000, 10)
+  assert.deepEqual(list, [{ time: 1000, value: 12 }])
+})
+
+test("historyPoints extracts a utilization series", () => {
+  const samples = [
+    { timestamp: "2026-10-25T09:00:00Z", metrics: { cpu: [{ name: "utilization", value: 10, unit: "%" }] } },
+    { timestamp: "2026-10-25T09:00:10Z", metrics: { cpu: [{ name: "utilization", value: 20, unit: "%" }] } },
+    { timestamp: "2026-10-25T09:00:20Z", metrics: { cpu: [] } }
+  ]
+  const points = Model.historyPoints(samples, "cpu", "utilization")
+  assert.equal(points.length, 2)
+  assert.equal(points[0].value, 10)
+  assert.equal(points[1].value, 20)
+})
+
+test("mergeHistory unions backfill and live points", () => {
+  const base = [{ time: 1000, value: 10 }, { time: 2000, value: 20 }]
+  const live = [{ time: 2000, value: 25 }, { time: 3000, value: 30 }]
+  assert.deepEqual(Model.mergeHistory(base, live, 0, 10), [
+    { time: 1000, value: 10 },
+    { time: 2000, value: 25 },
+    { time: 3000, value: 30 }
+  ])
+})
+
 test("empty snapshots are safe to render", () => {
   const snapshot = Model.emptySnapshot()
   assert.equal(snapshot.hasGpu, false)

@@ -34,6 +34,20 @@ Item {
     source.refresh()
   }
 
+  function fetchHistory() {
+    source.fetchHistory()
+  }
+
+  function applyHistory(history) {
+    if (!history) return
+    var cutoff = Date.now() - 3600000 - 60000
+    root.history = {
+      cpu: Model.mergeHistory(history.cpu, root.history.cpu, cutoff, 4000),
+      gpu: Model.mergeHistory(history.gpu, root.history.gpu, cutoff, 4000),
+      npu: Model.mergeHistory(history.npu, root.history.npu, cutoff, 4000)
+    }
+  }
+
   function reset() {
     root.snapshot = Model.emptySnapshot()
     root.history = ({ cpu: [], gpu: [], npu: [] })
@@ -59,13 +73,18 @@ Item {
     var now = Date.now()
     var current = root.history
     root.history = {
-      cpu: Model.appendPoint(current.cpu, next.cpu.utilization, now, 240),
-      gpu: Model.appendPoint(current.gpu, next.gpu.utilization, now, 240),
-      npu: Model.appendPoint(current.npu.utilization, now, 240)
+      cpu: Model.appendPoint(current.cpu, next.cpu.utilization, now, 4000),
+      gpu: Model.appendPoint(current.gpu, next.gpu.utilization, now, 4000),
+      npu: Model.appendPoint(current.npu.utilization, now, 4000)
     }
   }
 
-  onPanelOpenChanged: if (panelOpen) refresh()
+  onPanelOpenChanged: {
+    if (panelOpen) {
+      refresh()
+      fetchHistory()
+    }
+  }
 
   SourceTopsWatch {
     id: source
@@ -77,6 +96,17 @@ Item {
       root.status = status
       root.error = error
     }
+    onHistoryReceived: function(history) { root.applyHistory(history) }
+  }
+
+  // Keep the 1h backfill fresh while the panel stays open. The live polls
+  // fill the right edge in between; this only corrects the older buckets.
+  Timer {
+    id: historyTimer
+    interval: 300000
+    repeat: true
+    running: root.panelOpen
+    onTriggered: root.fetchHistory()
   }
 
   // Keep the last good sample visible but mark it when the daemon stops

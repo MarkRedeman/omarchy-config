@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell.Io
+import "Model.js" as Model
 
 // TopsWatch HTTP source.
 //
@@ -27,6 +28,7 @@ Item {
 
   signal sampleReceived(var sample)
   signal healthChanged(string status, string error)
+  signal historyReceived(var history)
 
   readonly property bool hasData: lastUpdated > 0
 
@@ -44,6 +46,11 @@ Item {
   function refresh() {
     if (!root.active || pollProc.running) return
     pollProc.running = true
+  }
+
+  function fetchHistory() {
+    if (!root.active || historyProc.running) return
+    historyProc.running = true
   }
 
   function setStatus(next, message) {
@@ -113,4 +120,36 @@ Item {
   }
 
   Component.onCompleted: refresh()
+
+  // One-hour backfill for the utilization chart. This is fetched on demand
+  // when the panel opens, not on every poll: the 1h tier is ~1.5 MB and only
+  // changes every 10 seconds.
+  Process {
+    id: historyProc
+    command: ["curl", "-fsS", "--max-time", "8", root.baseUrl() + "/api/metrics/history?range=1h"]
+
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        var raw = String(text || "")
+        if (raw === "") return
+        var parsed = null
+        try {
+          parsed = JSON.parse(raw)
+        } catch (parseError) {
+          return
+        }
+        if (!parsed || typeof parsed.length !== "number") return
+        root.historyReceived({
+          cpu: Model.historyPoints(parsed, "cpu", "utilization"),
+          gpu: Model.historyPoints(parsed, "gpu", "utilization"),
+          npu: Model.historyPoints(parsed, "npu", "utilization")
+        })
+      }
+    }
+
+    stderr: StdioCollector {
+      waitForEnd: true
+    }
+  }
 }

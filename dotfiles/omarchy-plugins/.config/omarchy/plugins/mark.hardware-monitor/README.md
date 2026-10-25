@@ -15,16 +15,18 @@ source can be added without touching the panel.
 
 | Area | Bar | Panel |
 |---|---|---|
-| CPU | utilization | utilization, per-type topology, frequency, power, temperature, memory |
-| GPU | utilization | per-engine busy (render, compute, copy, video, video enhance), media clock, frequency, power, memory |
-| NPU | utilization | frequency, power, temperature, DDR bandwidth, memory, tile config |
-| Power | package watts in tooltip | RAPL domains, battery state |
-| History | — | 2-minute CPU/GPU/NPU utilization chart |
+| CPU | single chip icon | toggleable card with a two-column detail grid: utilization, frequency, power, temperature, cores |
+| GPU | single chip icon | toggleable card with a two-column detail grid and a two-column engine grid: render, compute, copy, video, video enhance, media clock, frequency, power, memory |
+| NPU | single chip icon | toggleable card with a two-column detail grid: frequency, power, temperature, DDR bandwidth, memory, tile config |
+| Power | package watts in tooltip | two-column RAPL domain grid and battery state |
+| History | — | 1-hour CPU/GPU/NPU utilization chart; the card dots are the legend |
 | Health | stale/offline tooltip | TopsWatch warnings and a stale/offline banner |
 
-The bar defaults to `C12 G08 N00`-style segments. Right-click cycles
-`All → CPU → GPU → NPU → Worst → Icon`; left-click opens the panel;
-middle-click opens btop.
+The bar is a single chip icon; its tooltip carries the CPU/GPU/NPU and package
+numbers. Left-click opens the panel, right-click opens the TopsWatch web UI,
+and middle-click opens btop. The three summary cards sit side by side at the
+top of the panel; clicking a card (or pressing `C`, `G`, `N`) expands its
+full-width detail section below the row.
 
 ## Requirements
 
@@ -111,10 +113,10 @@ full metric set.
 
 ## Use
 
-Left-click the bar widget to open or close the panel. Right-click cycles the
-bar display; middle-click opens btop. While the panel is open, `R` refreshes,
-`E` toggles the GPU engine section, `W` opens the TopsWatch web UI, `B` opens
-btop, and `Esc` closes.
+Left-click the chip icon to open or close the panel. Right-click opens the
+TopsWatch web UI; middle-click opens btop. While the panel is open, `C`, `G`,
+and `N` toggle the CPU/GPU/NPU detail sections, `E` toggles the GPU details,
+`R` refreshes, `W` opens the web UI, `B` opens btop, and `Esc` closes.
 
 The plugin also registers its own IPC target, so a keybinding can open it
 without touching the bar:
@@ -137,13 +139,11 @@ the Omarchy settings UI:
 
 | Key | Default | Meaning |
 |---|---|---|
-| `barMode` | `All` | `All`, `CPU`, `GPU`, `NPU`, `Worst`, `Icon` |
 | `endpoint` | `http://127.0.0.1:9876` | TopsWatch base URL |
 | `closedRefreshSec` | `5` | Poll interval while the panel is closed |
 | `openRefreshSec` | `1` | Poll interval while the panel is open |
 | `warnPercent` | `80` | Warning tint threshold |
 | `critPercent` | `95` | Critical tint threshold |
-| `showEngines` | `On` | Show the GPU engine breakdown |
 | `showPower` | `On` | Show the power section |
 | `showChart` | `On` | Show the utilization history chart |
 
@@ -189,7 +189,7 @@ This plugin is licensed under the [Apache License, Version 2.0](LICENSE).
 
 ### Attribution
 
-`StatTile.qml` and `Sparkline.qml` are adapted from
+`Sparkline.qml` is adapted from
 [Harshith292002/omarchy-system-monitor](https://github.com/Harshith292002/omarchy-system-monitor),
 Copyright (c) 2026 Harshith Chennupati, and retain that project's MIT license.
 The MIT text is included in

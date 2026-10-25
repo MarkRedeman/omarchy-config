@@ -36,16 +36,12 @@ Panel {
 
   // ---------------------------------------------------------- settings
 
-  readonly property string barMode: String(setting("barMode", "All"))
   readonly property string endpoint: String(setting("endpoint", "http://127.0.0.1:9876"))
   readonly property int closedRefreshMs: Math.max(2000, Number(setting("closedRefreshSec", 5)) * 1000)
   readonly property int openRefreshMs: Math.max(1000, Number(setting("openRefreshSec", 1)) * 1000)
   readonly property real criticalThreshold: Math.max(Number(setting("critPercent", 95)), 61)
   readonly property real warningThreshold: Math.min(Number(setting("warnPercent", 80)), criticalThreshold - 1)
 
-  // The manifest uses enum On/Off for booleans so the settings UI never has
-  // to know a type the shell does not currently expose. Accept real booleans
-  // too, for hand-edited shell.json entries.
   function boolSetting(name, fallback) {
     var value = setting(name, fallback ? "On" : "Off")
     if (typeof value === "boolean") return value
@@ -53,17 +49,14 @@ Panel {
     return text !== "off" && text !== "false" && text !== "0"
   }
 
-  property bool enginesExpanded: boolSetting("showEngines", true)
   property bool chartExpanded: boolSetting("showChart", true)
   property bool powerExpanded: boolSetting("showPower", true)
 
-  function persistSetting(name, value) {
-    var next = Object.assign({}, settings)
-    next[name] = value
-    settings = next
-    if (bar && bar.shell && typeof bar.shell.updateEntryInline === "function")
-      bar.shell.updateEntryInline(moduleName, settings)
-  }
+  // Card state is session-local: expanding a card should not rewrite
+  // shell.json on every click.
+  property bool cpuExpanded: false
+  property bool gpuExpanded: false
+  property bool npuExpanded: false
 
   // ---------------------------------------------------------- data
 
@@ -78,20 +71,17 @@ Panel {
   readonly property var snapshot: metrics.snapshot
   readonly property bool hasGpu: metrics.hasGpu
   readonly property bool hasNpu: metrics.hasNpu
-  readonly property int headlineCount: 1 + (hasGpu ? 1 : 0) + (hasNpu ? 1 : 0)
-  readonly property real headlineWidth: Math.max(0, (panelColumn.width - Style.space(8) * (headlineCount - 1)) / headlineCount)
+  readonly property int tileCount: (snapshot.hasCpu ? 1 : 0) + (hasGpu ? 1 : 0) + (hasNpu ? 1 : 0)
+  readonly property real tileWidth: Math.max(0,
+    (panelColumn.width - Style.space(8) * Math.max(0, tileCount - 1)) / Math.max(1, tileCount))
 
   // ---------------------------------------------------------- bar
 
-  readonly property bool iconOnly: barMode === "Icon"
-  readonly property bool useSegments: !root.vertical && !root.iconOnly && root.barMode === "All"
-
-  readonly property var barSegments: {
-    var out = []
-    out.push({ key: "cpu", label: "C", value: snapshot.cpu.utilization })
-    if (hasGpu) out.push({ key: "gpu", label: "G", value: snapshot.gpu.utilization })
-    if (hasNpu) out.push({ key: "npu", label: "N", value: snapshot.npu.utilization })
-    return out
+  function worstValue() {
+    var value = snapshot.cpu.utilization
+    if (snapshot.hasGpu && snapshot.gpu.utilization > value) value = snapshot.gpu.utilization
+    if (snapshot.hasNpu && snapshot.npu.utilization > value) value = snapshot.npu.utilization
+    return value
   }
 
   function levelColor(value) {
@@ -101,23 +91,18 @@ Panel {
     return accent
   }
 
-  function segmentActive(value) {
-    return isFinite(value) && value >= warningThreshold
+  function barPressed(button) {
+    if (button === Qt.MiddleButton) launchBtop()
+    else if (button === Qt.RightButton) openWebUI()
+    else toggle()
   }
 
-  function segmentActiveColor(value) {
-    return isFinite(value) && value >= criticalThreshold ? urgent : warningColor
-  }
-
-  function barLabel() {
-    return Model.barLabel(root.snapshot, root.barMode, root.vertical)
-  }
-
-  function currentValue() {
-    if (root.barMode === "CPU") return root.snapshot.cpu.utilization
-    if (root.barMode === "GPU") return root.snapshot.gpu.utilization
-    if (root.barMode === "NPU") return root.snapshot.npu.utilization
-    return Model.worstMetric(root.snapshot).value
+  function ageText() {
+    if (!metrics.hasData) return "never"
+    var seconds = Math.max(0, Math.round((Date.now() - metrics.lastUpdated) / 1000))
+    if (seconds < 2) return "now"
+    if (seconds < 60) return seconds + "s ago"
+    return Math.round(seconds / 60) + "m ago"
   }
 
   function tooltipText() {
@@ -134,99 +119,24 @@ Panel {
     lines.push(metrics.status === "online" && !metrics.stale
       ? "TopsWatch · updated " + ageText()
       : "TopsWatch offline · click for details")
-    lines.push("Click for details · Right-click cycles")
+    lines.push("Click for details · Right-click web UI · Middle-click btop")
     return lines.join("\n")
   }
 
-  function ageText() {
-    if (!metrics.hasData) return "never"
-    var seconds = Math.max(0, Math.round((Date.now() - metrics.lastUpdated) / 1000))
-    if (seconds < 2) return "now"
-    if (seconds < 60) return seconds + "s ago"
-    return Math.round(seconds / 60) + "m ago"
-  }
-
-  function cycleBarMode() {
-    var modes = ["All", "CPU"]
-    if (hasGpu) modes.push("GPU")
-    if (hasNpu) modes.push("NPU")
-    modes.push("Worst", "Icon")
-    var index = modes.indexOf(barMode)
-    var next = modes[(index + 1) % modes.length]
-    persistSetting("barMode", next)
-  }
-
-  function barPressed(button) {
-    if (button === Qt.RightButton) cycleBarMode()
-    else if (button === Qt.MiddleButton) launchBtop()
-    else toggle()
-  }
-
-  function anchorItem() {
-    if (useSegments) return segmentRow
-    if (iconOnly) return iconButton
-    return singleButton
-  }
-
-  Row {
-    id: segmentRow
-    visible: root.useSegments
-    anchors.left: parent.left
-    anchors.verticalCenter: parent.verticalCenter
-    spacing: 0
-    opacity: metrics.status === "online" && !metrics.stale ? 1 : 0.55
-
-    Repeater {
-      model: root.barSegments
-
-      WidgetButton {
-        required property var modelData
-        bar: root.bar
-        text: modelData.label + Model.padPercent(modelData.value)
-        fontSize: Style.font.caption
-        horizontalMargin: Style.spaceReal(3)
-        active: root.segmentActive(modelData.value)
-        activeColor: root.segmentActiveColor(modelData.value)
-        tooltipText: root.tooltipText()
-        onPressed: function(button) { root.barPressed(button) }
-      }
-    }
-  }
-
-  WidgetButton {
-    id: singleButton
-    visible: !root.useSegments && !root.iconOnly
-    anchors.fill: parent
-    bar: root.bar
-    text: root.barLabel()
-    fontSize: Style.font.caption
-    horizontalMargin: 6
-    opacity: metrics.status === "online" && !metrics.stale ? 1 : 0.55
-    active: root.currentValue() >= root.warningThreshold
-    activeColor: root.currentValue() >= root.criticalThreshold ? root.urgent : root.warningColor
-    tooltipText: root.tooltipText()
-    onPressed: function(button) { root.barPressed(button) }
-  }
-
   BarIconButton {
-    id: iconButton
-    visible: root.iconOnly
+    id: barButton
     anchors.fill: parent
     bar: root.bar
-    text: "󰻠"
+    text: "󰚗"
     opacity: metrics.status === "online" && !metrics.stale ? 1 : 0.55
-    active: root.currentValue() >= root.warningThreshold
-    activeColor: root.currentValue() >= root.criticalThreshold ? root.urgent : root.warningColor
+    active: root.worstValue() >= root.warningThreshold
+    activeColor: root.worstValue() >= root.criticalThreshold ? root.urgent : root.warningColor
     tooltipText: root.tooltipText()
     onPressed: function(button) { root.barPressed(button) }
   }
 
-  implicitWidth: root.useSegments
-    ? segmentRow.implicitWidth
-    : (root.iconOnly ? iconButton.implicitWidth : singleButton.implicitWidth)
-  implicitHeight: root.useSegments
-    ? segmentRow.implicitHeight
-    : (root.iconOnly ? iconButton.implicitHeight : singleButton.implicitHeight)
+  implicitWidth: barButton.implicitWidth
+  implicitHeight: barButton.implicitHeight
 
   // ---------------------------------------------------------- panel helpers
 
@@ -254,7 +164,19 @@ Panel {
     return "TOPSWATCH"
   }
 
-  function cpuTileDetail() {
+  function coreCount() {
+    if (snapshot.cpu.cores && snapshot.cpu.cores.length > 0) return snapshot.cpu.cores.length
+    var extra = snapshot.devices.cpu && snapshot.devices.cpu.extra ? snapshot.devices.cpu.extra : {}
+    return Number(extra.threads || 0)
+  }
+
+  function coreUsageText() {
+    if (snapshot.cpu.coresUsed < 0) return "—"
+    var total = coreCount()
+    return snapshot.cpu.coresUsed.toFixed(1) + (total > 0 ? " / " + total : "")
+  }
+
+  function cpuSummary() {
     var parts = []
     if (snapshot.cpu.coresUsed >= 0)
       parts.push(snapshot.cpu.coresUsed.toFixed(1) + " cores")
@@ -263,7 +185,7 @@ Panel {
     return parts.length > 0 ? parts.join(" · ") : "No CPU data"
   }
 
-  function gpuTileDetail() {
+  function gpuSummary() {
     var parts = []
     if (snapshot.gpu.engines.length > 0)
       parts.push(snapshot.gpu.engines.length + " engines")
@@ -272,7 +194,7 @@ Panel {
     return parts.length > 0 ? parts.join(" · ") : "No GPU data"
   }
 
-  function npuTileDetail() {
+  function npuSummary() {
     var parts = []
     if (snapshot.npu.frequency >= 0)
       parts.push(Model.formatMHz(snapshot.npu.frequency))
@@ -318,7 +240,6 @@ Panel {
 
   onOpenedChanged: {
     if (opened) {
-      enginesExpanded = boolSetting("showEngines", true)
       chartExpanded = boolSetting("showChart", true)
       powerExpanded = boolSetting("showPower", true)
       metrics.refresh()
@@ -333,19 +254,24 @@ Panel {
     function close(): void { root.close() }
     function toggle(): void { root.toggle() }
     function refresh(): string { metrics.refresh(); return "ok" }
-    function cycle(): string { root.cycleBarMode(); return root.barMode }
+    function toggleCard(name: string): string {
+      if (name === "cpu") root.cpuExpanded = !root.cpuExpanded
+      else if (name === "gpu") root.gpuExpanded = !root.gpuExpanded
+      else if (name === "npu") root.npuExpanded = !root.npuExpanded
+      return name
+    }
   }
 
   // ---------------------------------------------------------- panel
 
   KeyboardPanel {
     id: panel
-    anchorItem: root.anchorItem()
+    anchorItem: barButton
     owner: root
     bar: root.bar
     open: root.opened
     focusTarget: keyCatcher
-    contentWidth: panel.fittedContentWidth(Style.space(440))
+    contentWidth: panel.fittedContentWidth(Style.space(460))
     contentHeight: panel.fittedContentHeight(panelColumn.implicitHeight, Style.space(720))
 
     PanelKeyCatcher {
@@ -362,7 +288,10 @@ Panel {
       onTextKey: function(text) {
         var key = String(text).toLowerCase()
         if (key === "r") metrics.refresh()
-        else if (key === "e") root.enginesExpanded = !root.enginesExpanded
+        else if (key === "c") root.cpuExpanded = !root.cpuExpanded
+        else if (key === "g") root.gpuExpanded = !root.gpuExpanded
+        else if (key === "n") root.npuExpanded = !root.npuExpanded
+        else if (key === "e") root.gpuExpanded = !root.gpuExpanded
         else if (key === "w") root.openWebUI()
         else if (key === "b") root.launchBtop()
       }
@@ -388,7 +317,7 @@ Panel {
             fontFamily: root.fontFamily
             iconComponent: Component {
               Text {
-                text: "󰻠"
+                text: "󰚗"
                 color: root.accent
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.display
@@ -484,57 +413,257 @@ Panel {
             }
           }
 
-          // Headline tiles.
+          // Summary cards are the first data in the panel. The colored dot
+          // matches the group's line in the graph below, so the graph does
+          // not need its own legend.
           Row {
             width: parent.width
             spacing: Style.space(8)
 
-            StatTile {
-              width: root.headlineWidth
+            GroupTile {
+              width: root.tileWidth
+              visible: root.snapshot.hasCpu
               title: "CPU"
               value: root.percent(root.snapshot.cpu.utilization)
-              detail: root.cpuTileDetail()
+              detail: root.cpuSummary()
               meter: root.snapshot.cpu.utilization
               meterColor: root.levelColor(root.snapshot.cpu.utilization)
+              seriesColor: root.accent
               alarming: root.snapshot.cpu.utilization >= root.criticalThreshold
+              expanded: root.cpuExpanded
               foreground: root.foreground
               muted: root.muted
               urgent: root.urgent
+              accent: root.accent
               fontFamily: root.fontFamily
+              onToggled: root.cpuExpanded = !root.cpuExpanded
             }
 
-            StatTile {
-              width: root.headlineWidth
-              visible: root.hasGpu
+            GroupTile {
+              width: root.tileWidth
+              visible: root.snapshot.hasGpu
               title: "GPU"
               value: root.percent(root.snapshot.gpu.utilization)
-              detail: root.gpuTileDetail()
+              detail: root.gpuSummary()
               meter: root.snapshot.gpu.utilization
               meterColor: root.levelColor(root.snapshot.gpu.utilization)
+              seriesColor: root.secondary
               alarming: root.snapshot.gpu.utilization >= root.criticalThreshold
+              expanded: root.gpuExpanded
               foreground: root.foreground
               muted: root.muted
               urgent: root.urgent
+              accent: root.accent
               fontFamily: root.fontFamily
+              onToggled: root.gpuExpanded = !root.gpuExpanded
             }
 
-            StatTile {
-              width: root.headlineWidth
-              visible: root.hasNpu
+            GroupTile {
+              width: root.tileWidth
+              visible: root.snapshot.hasNpu
               title: "NPU"
               value: root.percent(root.snapshot.npu.utilization)
-              detail: root.npuTileDetail()
+              detail: root.npuSummary()
               meter: root.snapshot.npu.utilization
               meterColor: root.levelColor(root.snapshot.npu.utilization)
+              seriesColor: root.tertiary
               alarming: root.snapshot.npu.utilization >= root.criticalThreshold
+              expanded: root.npuExpanded
               foreground: root.foreground
               muted: root.muted
               urgent: root.urgent
+              accent: root.accent
               fontFamily: root.fontFamily
+              onToggled: root.npuExpanded = !root.npuExpanded
             }
           }
 
-          // Utilization history.
+          // Expanded detail sections live below the card row and span the
+          // full panel width, so their two-column grids have room to breathe.
+          GroupDetail {
+            width: parent.width
+            visible: root.cpuExpanded && root.snapshot.hasCpu
+            title: "CPU DETAILS"
+            seriesColor: root.accent
+            foreground: root.foreground
+            muted: root.muted
+            accent: root.accent
+            fontFamily: root.fontFamily
+            onToggled: root.cpuExpanded = false
+
+            DetailGrid {
+              DetailCell {
+                label: "Frequency"
+                value: Model.formatMHz(root.snapshot.cpu.frequency)
+              }
+              DetailCell {
+                label: "Power"
+                value: Model.formatWatts(root.snapshot.cpu.power)
+              }
+              DetailCell {
+                label: "Temperature"
+                value: Model.formatTemperature(root.snapshot.cpu.temperature)
+              }
+              DetailCell {
+                label: "Cores"
+                value: root.coreUsageText()
+              }
+            }
+          }
+
+          GroupDetail {
+            width: parent.width
+            visible: root.gpuExpanded && root.snapshot.hasGpu
+            title: "GPU DETAILS"
+            seriesColor: root.secondary
+            foreground: root.foreground
+            muted: root.muted
+            accent: root.accent
+            fontFamily: root.fontFamily
+            onToggled: root.gpuExpanded = false
+
+            DetailGrid {
+              DetailCell {
+                label: "Frequency"
+                value: root.snapshot.gpu.frequency >= 0
+                  ? Model.formatMHz(root.snapshot.gpu.frequency) +
+                    (root.snapshot.gpu.frequencyMax >= 0 ? " / " + Model.formatMHz(root.snapshot.gpu.frequencyMax) : "")
+                  : "—"
+              }
+              DetailCell {
+                label: "Media clock"
+                value: Model.formatMHz(root.snapshot.gpu.mediaFrequency)
+              }
+              DetailCell {
+                label: "Power"
+                value: Model.formatWatts(root.snapshot.gpu.power)
+              }
+              DetailCell {
+                label: "Memory"
+                value: Model.formatBytes(root.snapshot.gpu.memoryUsed)
+              }
+            }
+
+            Column {
+              width: parent.width
+              spacing: Style.space(4)
+              visible: root.snapshot.gpu.engines.length > 0
+
+              SectionHeading {
+                title: "ENGINES"
+                value: root.mediaFreqText()
+              }
+
+              Grid {
+                width: parent.width
+                columns: 2
+                columnSpacing: Style.space(12)
+                rowSpacing: Style.space(6)
+
+                Repeater {
+                  model: root.snapshot.gpu.engines
+
+                  EngineCell {
+                    label: modelData.label
+                    value: modelData.value
+                    meterColor: root.levelColor(modelData.value)
+                  }
+                }
+              }
+            }
+          }
+
+          GroupDetail {
+            width: parent.width
+            visible: root.npuExpanded && root.snapshot.hasNpu
+            title: "NPU DETAILS"
+            seriesColor: root.tertiary
+            foreground: root.foreground
+            muted: root.muted
+            accent: root.accent
+            fontFamily: root.fontFamily
+            onToggled: root.npuExpanded = false
+
+            DetailGrid {
+              DetailCell {
+                label: "Frequency"
+                value: Model.formatMHz(root.snapshot.npu.frequency)
+              }
+              DetailCell {
+                label: "Power"
+                value: Model.formatWatts(root.snapshot.npu.power)
+              }
+              DetailCell {
+                label: "Temperature"
+                value: Model.formatTemperature(root.snapshot.npu.temperature)
+              }
+              DetailCell {
+                label: "DDR bandwidth"
+                value: Model.formatRate(root.snapshot.npu.ddrBandwidth)
+              }
+              DetailCell {
+                label: "Memory"
+                value: Model.formatBytes(root.snapshot.npu.memoryUsed) + " / " +
+                  Model.formatBytes(root.snapshot.npu.memoryTotal)
+                meter: root.snapshot.npu.memoryPercent
+                meterColor: root.levelColor(root.snapshot.npu.memoryPercent)
+              }
+              DetailCell {
+                label: "Tile config"
+                value: root.snapshot.npu.tileConfig >= 0 ? String(root.snapshot.npu.tileConfig) : "—"
+              }
+            }
+          }
+
+          // System RAM sits below the cards but above the graph: it is the
+          // one resource every workload shares.
+          Column {
+            width: parent.width
+            spacing: Style.space(3)
+            visible: root.snapshot.cpu.memoryTotal > 0
+
+            Item {
+              width: parent.width
+              implicitHeight: Math.max(memoryLabel.implicitHeight, memoryValue.implicitHeight)
+
+              Text {
+                id: memoryLabel
+                text: "MEMORY"
+                textFormat: Text.PlainText
+                color: root.muted
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                font.bold: true
+                font.letterSpacing: 1.2
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+              }
+
+              Text {
+                id: memoryValue
+                text: Model.formatBytes(root.snapshot.cpu.memoryUsed) + " / " +
+                  Model.formatBytes(root.snapshot.cpu.memoryTotal) + " · " +
+                  Model.formatPercent(root.snapshot.cpu.memoryPercent, 1)
+                textFormat: Text.PlainText
+                color: root.foreground
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.bodySmall
+                font.bold: true
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+              }
+            }
+
+            Meter {
+              width: parent.width
+              value: root.snapshot.cpu.memoryPercent
+              fillColor: root.levelColor(root.snapshot.cpu.memoryPercent)
+            }
+          }
+
+          // Utilization history: the 1h tier is backfilled from TopsWatch
+          // when the panel opens, then extended by the live polls. The card
+          // dots above are the legend; no separate legend is needed.
           Column {
             width: parent.width
             spacing: Style.space(4)
@@ -542,7 +671,7 @@ Panel {
 
             SectionHeading {
               title: "UTILIZATION"
-              value: "2 MIN"
+              value: "1 HOUR"
             }
 
             Item {
@@ -554,197 +683,43 @@ Panel {
                 series: root.utilSeries()
                 fixedMaximum: 100
                 gridColor: root.chartGrid
-                windowMs: 120000
+                windowMs: 3600000
               }
-            }
-
-            Row {
-              spacing: Style.space(10)
-
-              LegendDot { colorValue: root.accent; label: "CPU" }
-              LegendDot { colorValue: root.secondary; label: "GPU"; visible: root.hasGpu }
-              LegendDot { colorValue: root.tertiary; label: "NPU"; visible: root.hasNpu }
             }
           }
 
-          // GPU engine breakdown.
+          // Power domains, in the same two-column rhythm as the card bodies.
           Column {
             width: parent.width
             spacing: Style.space(4)
-            visible: root.enginesExpanded && root.hasGpu && root.snapshot.gpu.engines.length > 0
-
-            SectionHeading {
-              title: "GPU ENGINES"
-              value: root.mediaFreqText()
-            }
-
-            Repeater {
-              model: root.snapshot.gpu.engines
-
-              EngineRow {
-                width: parent.width
-                label: modelData.label
-                description: modelData.description
-                value: modelData.value
-                meterColor: root.levelColor(modelData.value)
-              }
-            }
-          }
-
-          // CPU detail.
-          Column {
-            width: parent.width
-            spacing: Style.space(3)
-            visible: root.snapshot.hasCpu
-
-            SectionHeading {
-              title: "CPU"
-              value: Model.coreTypeSummary(root.snapshot.devices)
-            }
-
-            DetailRow {
-              label: "Frequency"
-              value: Model.formatMHz(root.snapshot.cpu.frequency)
-              visible: root.snapshot.cpu.frequency >= 0
-            }
-            DetailRow {
-              label: "Power"
-              value: Model.formatWatts(root.snapshot.cpu.power)
-              visible: root.snapshot.cpu.power >= 0
-            }
-            DetailRow {
-              label: "Temperature"
-              value: Model.formatTemperature(root.snapshot.cpu.temperature)
-              visible: root.snapshot.cpu.temperature >= 0
-            }
-            DetailRow {
-              label: "Memory"
-              value: Model.formatBytes(root.snapshot.cpu.memoryUsed) + " / " + Model.formatBytes(root.snapshot.cpu.memoryTotal)
-              visible: root.snapshot.cpu.memoryTotal > 0
-              meter: root.snapshot.cpu.memoryPercent
-              meterColor: root.levelColor(root.snapshot.cpu.memoryPercent)
-            }
-          }
-
-          // GPU detail.
-          Column {
-            width: parent.width
-            spacing: Style.space(3)
-            visible: root.hasGpu
-
-            SectionHeading {
-              title: "GPU"
-              value: root.snapshot.devices.gpu && root.snapshot.devices.gpu.extra
-                ? String(root.snapshot.devices.gpu.extra.driver || "")
-                : ""
-            }
-
-            DetailRow {
-              label: "Frequency"
-              value: root.snapshot.gpu.frequency >= 0
-                ? Model.formatMHz(root.snapshot.gpu.frequency) +
-                  (root.snapshot.gpu.frequencyMax >= 0 ? " / " + Model.formatMHz(root.snapshot.gpu.frequencyMax) : "")
-                : "—"
-            }
-            DetailRow {
-              label: "Media clock"
-              value: Model.formatMHz(root.snapshot.gpu.mediaFrequency)
-              visible: root.snapshot.gpu.mediaFrequency >= 0
-            }
-            DetailRow {
-              label: "Power"
-              value: Model.formatWatts(root.snapshot.gpu.power)
-              visible: root.snapshot.gpu.power >= 0
-            }
-            DetailRow {
-              label: "Temperature"
-              value: Model.formatTemperature(root.snapshot.gpu.temperature)
-              visible: root.snapshot.gpu.temperature >= 0
-            }
-            DetailRow {
-              label: "Memory"
-              value: Model.formatBytes(root.snapshot.gpu.memoryUsed)
-              visible: root.snapshot.gpu.memoryUsed >= 0
-            }
-          }
-
-          // NPU detail.
-          Column {
-            width: parent.width
-            spacing: Style.space(3)
-            visible: root.hasNpu
-
-            SectionHeading {
-              title: "NPU"
-              value: root.snapshot.devices.npu && root.snapshot.devices.npu.extra
-                ? String(root.snapshot.devices.npu.extra.generation || "").toUpperCase()
-                : ""
-            }
-
-            DetailRow {
-              label: "Frequency"
-              value: Model.formatMHz(root.snapshot.npu.frequency)
-              visible: root.snapshot.npu.frequency >= 0
-            }
-            DetailRow {
-              label: "Power"
-              value: Model.formatWatts(root.snapshot.npu.power)
-              visible: root.snapshot.npu.power >= 0
-            }
-            DetailRow {
-              label: "Temperature"
-              value: Model.formatTemperature(root.snapshot.npu.temperature)
-              visible: root.snapshot.npu.temperature >= 0
-            }
-            DetailRow {
-              label: "DDR bandwidth"
-              value: Model.formatRate(root.snapshot.npu.ddrBandwidth)
-              visible: root.snapshot.npu.ddrBandwidth >= 0
-            }
-            DetailRow {
-              label: "Memory"
-              value: Model.formatBytes(root.snapshot.npu.memoryUsed) + " / " + Model.formatBytes(root.snapshot.npu.memoryTotal)
-              visible: root.snapshot.npu.memoryTotal > 0
-              meter: root.snapshot.npu.memoryPercent
-              meterColor: root.levelColor(root.snapshot.npu.memoryPercent)
-            }
-            DetailRow {
-              label: "Tile config"
-              value: root.snapshot.npu.tileConfig >= 0 ? String(root.snapshot.npu.tileConfig) : "—"
-              visible: root.snapshot.npu.tileConfig >= 0
-            }
-          }
-
-          // Power domains.
-          Column {
-            width: parent.width
-            spacing: Style.space(3)
-            visible: root.powerExpanded && (root.snapshot.power.domains.length > 0 || root.snapshot.power.battery.capacity >= 0)
+            visible: root.powerExpanded &&
+              (root.snapshot.power.domains.length > 0 || root.snapshot.power.battery.capacity >= 0)
 
             SectionHeading {
               title: "POWER"
               value: root.powerSummary()
             }
 
-            Repeater {
-              model: root.snapshot.power.domains
+            DetailGrid {
+              Repeater {
+                model: root.snapshot.power.domains
 
-              DetailRow {
-                width: parent.width
-                label: modelData.domain
-                value: Model.formatWatts(modelData.watts)
+                DetailCell {
+                  label: modelData.domain
+                  value: Model.formatWatts(modelData.watts)
+                }
               }
-            }
 
-            DetailRow {
-              label: "Battery"
-              value: root.snapshot.power.battery.capacity >= 0
-                ? root.snapshot.power.battery.capacity + "%" +
-                  (root.snapshot.power.battery.discharging ? " · discharging" : "")
-                : "—"
-              visible: root.snapshot.power.battery.capacity >= 0
-              meter: root.snapshot.power.battery.capacity
-              meterColor: root.snapshot.power.battery.capacity < 20 ? root.urgent : root.accent
+              DetailCell {
+                label: "Battery"
+                value: root.snapshot.power.battery.capacity >= 0
+                  ? root.snapshot.power.battery.capacity + "%" +
+                    (root.snapshot.power.battery.discharging ? " · discharging" : "")
+                  : "—"
+                visible: root.snapshot.power.battery.capacity >= 0
+                meter: root.snapshot.power.battery.capacity
+                meterColor: root.snapshot.power.battery.capacity < 20 ? root.urgent : root.accent
+              }
             }
           }
 
@@ -905,39 +880,54 @@ Panel {
     }
   }
 
-  component DetailRow: Column {
-    id: row
+  component DetailGrid: Grid {
+    width: parent ? parent.width : 0
+    columns: 2
+    columnSpacing: Style.space(12)
+    rowSpacing: Style.space(6)
+  }
+
+  component DetailCell: Column {
+    id: cell
+
     property string label: ""
     property string value: "—"
     property real meter: -1
     property color meterColor: root.accent
 
-    width: parent ? parent.width : 0
-    spacing: Style.space(3)
+    width: parent && parent.columnSpacing !== undefined
+      ? (parent.width - parent.columnSpacing) / 2
+      : (parent ? parent.width : 0)
+    spacing: Style.space(2)
 
     Item {
       width: parent.width
-      implicitHeight: Math.max(labelText.implicitHeight, valueText.implicitHeight)
+      implicitHeight: Math.max(cellLabel.implicitHeight, cellValue.implicitHeight)
 
       Text {
-        id: labelText
-        text: row.label
+        id: cellLabel
+        width: Math.max(0, parent.width - cellValue.width - Style.space(6))
+        text: cell.label
         textFormat: Text.PlainText
-        color: root.foreground
+        color: root.muted
         font.family: root.fontFamily
-        font.pixelSize: Style.font.bodySmall
+        font.pixelSize: Style.font.caption
+        elide: Text.ElideRight
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
       }
 
       Text {
-        id: valueText
-        text: row.value
+        id: cellValue
+        text: cell.value
         textFormat: Text.PlainText
-        color: root.muted
+        color: root.foreground
         font.family: root.fontFamily
         font.pixelSize: Style.font.bodySmall
         font.bold: true
+        width: Math.min(implicitWidth, parent.width * 0.68)
+        elide: Text.ElideRight
+        horizontalAlignment: Text.AlignRight
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
       }
@@ -945,49 +935,37 @@ Panel {
 
     Meter {
       width: parent.width
-      visible: row.meter >= 0
-      value: row.meter
-      fillColor: row.meterColor
+      visible: cell.meter >= 0
+      value: cell.meter
+      fillColor: cell.meterColor
     }
   }
 
-  component EngineRow: Column {
+  component EngineCell: Column {
     id: engine
+
     property string label: ""
-    property string description: ""
     property real value: -1
     property color meterColor: root.accent
 
-    width: parent ? parent.width : 0
-    spacing: Style.space(3)
+    width: parent && parent.columnSpacing !== undefined
+      ? (parent.width - parent.columnSpacing) / 2
+      : (parent ? parent.width : 0)
+    spacing: Style.space(2)
 
     Item {
       width: parent.width
       implicitHeight: Math.max(engineLabel.implicitHeight, engineValue.implicitHeight)
 
-      Row {
+      Text {
         id: engineLabel
+        text: engine.label
+        textFormat: Text.PlainText
+        color: root.foreground
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.bodySmall
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Style.space(6)
-
-        Text {
-          text: engine.label
-          textFormat: Text.PlainText
-          color: root.foreground
-          font.family: root.fontFamily
-          font.pixelSize: Style.font.bodySmall
-          font.bold: true
-        }
-
-        Text {
-          text: engine.description
-          textFormat: Text.PlainText
-          visible: text !== ""
-          color: root.muted
-          font.family: root.fontFamily
-          font.pixelSize: Style.font.caption
-        }
       }
 
       Text {
@@ -1010,25 +988,4 @@ Panel {
     }
   }
 
-  component LegendDot: Row {
-    property color colorValue: root.accent
-    property string label: ""
-
-    spacing: Style.space(4)
-
-    Rectangle {
-      width: Style.space(6)
-      height: width
-      radius: width / 2
-      color: parent.colorValue
-    }
-
-    Text {
-      text: parent.label
-      textFormat: Text.PlainText
-      color: root.muted
-      font.family: root.fontFamily
-      font.pixelSize: Style.font.caption
-    }
-  }
 }

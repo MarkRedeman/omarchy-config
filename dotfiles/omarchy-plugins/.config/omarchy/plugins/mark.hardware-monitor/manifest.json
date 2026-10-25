@@ -28,24 +28,15 @@
     "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {
-      "barMode": "All",
       "endpoint": "http://127.0.0.1:9876",
       "closedRefreshSec": 5,
       "openRefreshSec": 1,
       "warnPercent": 80,
       "critPercent": 95,
-      "showEngines": "On",
       "showPower": "On",
       "showChart": "On"
     },
     "schema": [
-      {
-        "key": "barMode",
-        "type": "enum",
-        "label": "Bar display",
-        "options": ["All", "CPU", "GPU", "NPU", "Worst", "Icon"],
-        "defaultValue": "All"
-      },
       {
         "key": "endpoint",
         "type": "string",
@@ -90,24 +81,23 @@
         "defaultValue": 95
       },
       {
-        "key": "showEngines",
-        "type": "enum",
-        "label": "GPU engine breakdown",
-        "options": ["On", "Off"],
-        "defaultValue": "On"
-      },
-      {
         "key": "showPower",
         "type": "enum",
         "label": "Power section",
-        "options": ["On", "Off"],
+        "options": [
+          "On",
+          "Off"
+        ],
         "defaultValue": "On"
       },
       {
         "key": "showChart",
         "type": "enum",
         "label": "Utilization chart",
-        "options": ["On", "Off"],
+        "options": [
+          "On",
+          "Off"
+        ],
         "defaultValue": "On"
       }
     ]
