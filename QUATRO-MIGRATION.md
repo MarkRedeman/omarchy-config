@@ -7,7 +7,8 @@ Tracker for upgrading these dotfiles from Omarchy **v3 (3.8.x)** to Omarchy
 > ## TODO — open work item
 >
 > - **Build the `mark.workspace-switcher` shell plugin** after the machine
->   upgrade. Full spec: [`plugins/mark.workspace-switcher/PLAN.md`](plugins/mark.workspace-switcher/PLAN.md).
+>   upgrade. Full spec:
+>   [`mark.workspace-switcher/PLAN.md`](dotfiles/omarchy-plugins/.config/omarchy/plugins/mark.workspace-switcher/PLAN.md).
 >   It replaces the walker-based `omarchy-workspace-select` (bound to
 >   `SUPER + S`, fails silently on quattro), takes over SUPER+N/P cycling,
 >   and adds named-workspace bar chips. Implementation starts only after the
@@ -298,7 +299,8 @@ removed from the repo; stock quattro themes are used instead.
 - [x] `omarchy-nightlight-toggle` — removed; superseded by
       `omarchy-toggle-nightlight`
 - [D] `omarchy-workspace-select` — superseded by the `mark.workspace-switcher`
-      plugin (see top TODO + [`plugins/mark.workspace-switcher/PLAN.md`](plugins/mark.workspace-switcher/PLAN.md));
+      plugin (see top TODO +
+      [`PLAN.md`](dotfiles/omarchy-plugins/.config/omarchy/plugins/mark.workspace-switcher/PLAN.md));
       script is deleted once the plugin's cycling and selector are verified
 - [D] `omarchy-waybar-workspace-scroll` — will retire when the plugin takes
       over SUPER+N/P cycling

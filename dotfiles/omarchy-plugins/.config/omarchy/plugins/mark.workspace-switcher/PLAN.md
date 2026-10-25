@@ -30,6 +30,7 @@ Runtime home (stowed from the repo):
 
 ```
 dotfiles/omarchy-plugins/.config/omarchy/plugins/mark.workspace-switcher/
+├── PLAN.md              # this design note
 ├── manifest.json        # kinds: panel + bar-widget, keepLoaded: true
 ├── Panel.qml            # switcher surface (workspaces mode) + cycle() IPC
 ├── Widget.qml           # occupied-only name chips for the bar

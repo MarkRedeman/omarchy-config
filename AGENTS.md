@@ -21,7 +21,9 @@ Start with:
 - `README.md` — install and package layout
 - `QUATRO-MIGRATION.md` — what changed in the v4 migration
 - `handoff-looknfeel.md` — theme, gaps, corner radius, bar reproduction
-- `plugins/*/PLAN.md` — design notes for larger plugin work
+- plugin-local `PLAN.md` files under
+  `dotfiles/omarchy-plugins/.config/omarchy/plugins/*/` — design notes for
+  larger plugin work
 
 ## Ground rules
 
@@ -44,7 +46,7 @@ Start with:
 dotfiles/<package>/.config/...                    Stow packages
 dotfiles/omarchy/.config/omarchy/shell.json       Bar layout + plugin entries
 dotfiles/omarchy-plugins/.config/omarchy/plugins/ Quickshell plugins
-plugins/<id>/PLAN.md                              Larger plugin design notes
+dotfiles/omarchy-plugins/.config/omarchy/plugins/<id>/PLAN.md  Plugin design notes
 scripts/deploy.sh                                 First-time setup (packages, hy3, stow)
 scripts/stow.sh                                   Re-stow every package
 scripts/install-topswatch.sh                      Hardware-monitor daemon installer wrapper
