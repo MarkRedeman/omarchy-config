@@ -1,0 +1,40 @@
+[Unit]
+Description=TopsWatch hardware telemetry daemon
+Documentation=https://github.com/scottmbaker/topswatch
+After=network.target
+
+[Service]
+Type=simple
+# TopsWatch reads RAPL, Intel PMT, and the xe PMU. The dedicated dynamic
+# user keeps those privileges out of the login session; the capabilities
+# are ambient only for this process.
+DynamicUser=yes
+AmbientCapabilities=CAP_PERFMON CAP_DAC_READ_SEARCH CAP_SYS_PTRACE
+CapabilityBoundingSet=CAP_PERFMON CAP_DAC_READ_SEARCH CAP_SYS_PTRACE
+NoNewPrivileges=yes
+
+ExecStart=/usr/local/bin/topswatch --config /etc/topswatch.yaml
+Restart=on-failure
+RestartSec=2
+Nice=5
+
+# TopsWatch only reads /sys and /proc. Keep the service away from the rest
+# of the machine, and keep the HTTP listener on loopback.
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+IPAddressAllow=localhost
+IPAddressDeny=any
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

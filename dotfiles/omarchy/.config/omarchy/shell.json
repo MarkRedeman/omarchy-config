@@ -55,6 +55,9 @@
           "id": "omarchy.agents"
         },
         {
+          "id": "mark.hardware-monitor"
+        },
+        {
           "id": "omarchy.bluetooth"
         },
         {

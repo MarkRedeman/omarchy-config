@@ -1,0 +1,22 @@
+server:
+  # Loopback only: the API has no authentication.
+  address: "127.0.0.1"
+  port: 9876
+
+collector:
+  interval: 1s
+  history: 300
+  # The process table walk is the expensive part. The panel only needs the
+  # per-process view if we add it later; 60s keeps the daemon cheap while
+  # GPU/NPU utilization and power still update every second.
+  process_rescan: 60s
+
+collectors:
+  cpu:
+    enabled: true
+  gpu:
+    enabled: true
+  npu:
+    enabled: true
+  power:
+    enabled: true

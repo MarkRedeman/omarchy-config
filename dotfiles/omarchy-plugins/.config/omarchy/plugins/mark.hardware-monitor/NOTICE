@@ -1,0 +1,11 @@
+Hardware Monitor
+Copyright 2026 Mark Redeman
+
+This product includes software adapted from omarchy-system-monitor
+(https://github.com/Harshith292002/omarchy-system-monitor),
+Copyright (c) 2026 Harshith Chennupati, licensed under the MIT License.
+The MIT license text is included in LICENSES/MIT-omarchy-system-monitor.txt.
+
+The hardware telemetry is provided by TopsWatch
+(https://github.com/scottmbaker/topswatch), a separate project that is not
+redistributed with this plugin.

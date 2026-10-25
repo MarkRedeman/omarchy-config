@@ -1,0 +1,34 @@
+[Unit]
+Description=TopsWatch hardware telemetry daemon (root fallback)
+Documentation=https://github.com/scottmbaker/topswatch
+After=network.target
+
+[Service]
+Type=simple
+# Fallback for kernels or capability setups where the dedicated-user unit
+# cannot open RAPL, PMT, or the xe PMU. Prefer topswatch.service.
+User=root
+NoNewPrivileges=yes
+ExecStart=/usr/local/bin/topswatch --config /etc/topswatch.yaml
+Restart=on-failure
+RestartSec=2
+Nice=5
+
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+IPAddressAllow=localhost
+IPAddressDeny=any
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

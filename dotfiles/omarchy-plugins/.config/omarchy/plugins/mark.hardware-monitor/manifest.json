@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "id": "mark.hardware-monitor",
+  "name": "Hardware Monitor",
+  "version": "0.1.0",
+  "author": "Mark Redeman",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/MarkRedeman/omarchy-config",
+  "description": "CPU, GPU, and NPU utilization for Panther Lake systems, with optional TopsWatch telemetry.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Hardware Monitor",
+    "description": "CPU, GPU, and NPU utilization, GPU engine breakdown, power, and Panther Lake NPU detail.",
+    "category": "System",
+    "aliases": [
+      "hardware",
+      "cpu",
+      "gpu",
+      "npu",
+      "tops"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "barMode": "All",
+      "endpoint": "http://127.0.0.1:9876",
+      "closedRefreshSec": 5,
+      "openRefreshSec": 1,
+      "warnPercent": 80,
+      "critPercent": 95,
+      "showEngines": "On",
+      "showPower": "On",
+      "showChart": "On"
+    },
+    "schema": [
+      {
+        "key": "barMode",
+        "type": "enum",
+        "label": "Bar display",
+        "options": ["All", "CPU", "GPU", "NPU", "Worst", "Icon"],
+        "defaultValue": "All"
+      },
+      {
+        "key": "endpoint",
+        "type": "string",
+        "label": "TopsWatch endpoint",
+        "defaultValue": "http://127.0.0.1:9876",
+        "description": "Loopback by default. A remote endpoint must be reachable over HTTP."
+      },
+      {
+        "key": "closedRefreshSec",
+        "type": "integer",
+        "label": "Closed refresh interval (seconds)",
+        "min": 2,
+        "max": 60,
+        "step": 1,
+        "defaultValue": 5
+      },
+      {
+        "key": "openRefreshSec",
+        "type": "integer",
+        "label": "Open refresh interval (seconds)",
+        "min": 1,
+        "max": 10,
+        "step": 1,
+        "defaultValue": 1
+      },
+      {
+        "key": "warnPercent",
+        "type": "integer",
+        "label": "Warning threshold",
+        "min": 50,
+        "max": 95,
+        "step": 1,
+        "defaultValue": 80
+      },
+      {
+        "key": "critPercent",
+        "type": "integer",
+        "label": "Critical threshold",
+        "min": 60,
+        "max": 100,
+        "step": 1,
+        "defaultValue": 95
+      },
+      {
+        "key": "showEngines",
+        "type": "enum",
+        "label": "GPU engine breakdown",
+        "options": ["On", "Off"],
+        "defaultValue": "On"
+      },
+      {
+        "key": "showPower",
+        "type": "enum",
+        "label": "Power section",
+        "options": ["On", "Off"],
+        "defaultValue": "On"
+      },
+      {
+        "key": "showChart",
+        "type": "enum",
+        "label": "Utilization chart",
+        "options": ["On", "Off"],
+        "defaultValue": "On"
+      }
+    ]
+  }
+}

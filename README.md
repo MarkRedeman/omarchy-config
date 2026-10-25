@@ -54,6 +54,22 @@ stow --restow --target=$HOME --dir=dotfiles hypr
 
 See the `README.md` inside each package for details.
 
+## Hardware Monitor plugin
+
+The `mark.hardware-monitor` bar widget shows CPU, GPU, and NPU utilization,
+with a native panel for Panther Lake-specific detail (GPU engines, media
+clock, NPU PMT metrics, power domains). It reads telemetry from a local
+[TopsWatch](https://github.com/scottmbaker/topswatch) daemon.
+
+Install the daemon once:
+
+```bash
+./scripts/install-topswatch.sh
+```
+
+Then stow/rescan/enable the plugin as described in
+[its README](dotfiles/omarchy-plugins/.config/omarchy/plugins/mark.hardware-monitor/README.md).
+
 ## Updating
 
 Edit files under `dotfiles/`, then re-stow:

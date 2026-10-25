@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-10-25T01:24:47Z",
+  "devices": {
+    "cpu": {
+      "name": "Intel(R) Core(TM) Ultra X7 358H",
+      "extra": { "p_cores": "4", "e_cores": "8", "lp_cores": "4", "threads": "16" }
+    },
+    "gpu": {
+      "name": "Intel GPU (0xb080)",
+      "pci_device": "0xb080",
+      "extra": { "driver": "xe", "card": "card0", "pci_slot": "0000:00:02.0" }
+    },
+    "npu": {
+      "name": "Intel NPU (Panther Lake)",
+      "pci_device": "0xb03e",
+      "driver_version": "1.0.0 7.2.8-9-omarchy",
+      "extra": { "generation": "ptl", "pci_slot": "0000:00:0b.0" }
+    },
+    "power": {
+      "name": "Power and energy",
+      "extra": { "battery": "BAT0", "system_source": "battery" }
+    }
+  },
+  "metrics": {
+    "cpu": [
+      { "name": "utilization", "value": 12.5, "unit": "%" },
+      { "name": "cores_used", "value": 1.25, "unit": "" },
+      { "name": "frequency", "value": 1234.5, "unit": "MHz" },
+      { "name": "power", "value": 7.25, "unit": "W" },
+      { "name": "temperature", "value": 51, "unit": "C" },
+      { "name": "memory_used", "value": 12884901888, "unit": "bytes" },
+      { "name": "memory_total", "value": 68719476736, "unit": "bytes" },
+      { "name": "memory_used_percent", "value": 18.75, "unit": "%" },
+      { "name": "core_utilization", "value": 30, "unit": "%", "labels": { "core": "0", "core_type": "performance" } },
+      { "name": "core_frequency", "value": 2400, "unit": "MHz", "labels": { "core": "0", "core_type": "performance" } },
+      { "name": "core_utilization", "value": 5, "unit": "%", "labels": { "core": "1", "core_type": "efficient" } },
+      { "name": "core_frequency", "value": 1200, "unit": "MHz", "labels": { "core": "1", "core_type": "efficient" } }
+    ],
+    "gpu": [
+      { "name": "utilization", "value": 42.5, "unit": "%" },
+      { "name": "frequency_actual", "value": 1800, "unit": "MHz" },
+      { "name": "frequency_max", "value": 2500, "unit": "MHz" },
+      { "name": "media_frequency_actual", "value": 600, "unit": "MHz" },
+      { "name": "power", "value": 4.5, "unit": "W" },
+      { "name": "temperature", "value": 48, "unit": "C" },
+      { "name": "engine_busy", "value": 35, "unit": "%", "labels": { "engine": "rcs0" } },
+      { "name": "engine_busy", "value": 5, "unit": "%", "labels": { "engine": "ccs0" } },
+      { "name": "engine_busy", "value": 1, "unit": "%", "labels": { "engine": "bcs0" } },
+      { "name": "engine_busy", "value": 1.5, "unit": "%", "labels": { "engine": "vcs0" } },
+      { "name": "engine_busy", "value": 0, "unit": "%", "labels": { "engine": "vecs0" } },
+      { "name": "memory_used", "value": 1073741824, "unit": "bytes", "labels": { "class": "graphics" } },
+      { "name": "memory_used", "value": 268435456, "unit": "bytes", "labels": { "class": "compute" } },
+      { "name": "memory_used", "value": 0, "unit": "bytes", "labels": { "class": "video" } }
+    ],
+    "npu": [
+      { "name": "utilization", "value": 18, "unit": "%" },
+      { "name": "frequency", "value": 1400, "unit": "MHz" },
+      { "name": "power", "value": 1.75, "unit": "W" },
+      { "name": "temperature", "value": 45, "unit": "C" },
+      { "name": "ddr_bandwidth", "value": 1250, "unit": "MB/s" },
+      { "name": "memory_used", "value": 68714496, "unit": "bytes" },
+      { "name": "memory_total", "value": 68719476736, "unit": "bytes" },
+      { "name": "memory_used_percent", "value": 0.1, "unit": "%" },
+      { "name": "tile_config", "value": 2, "unit": "" }
+    ],
+    "power": [
+      { "name": "battery_capacity", "value": 58, "unit": "%" },
+      { "name": "battery_voltage", "value": 11.697, "unit": "V" },
+      { "name": "battery_discharging", "value": 1, "unit": "" },
+      { "name": "power", "value": 6.2, "unit": "W", "labels": { "domain": "battery" } },
+      { "name": "power", "value": 9.5, "unit": "W", "labels": { "domain": "package" } },
+      { "name": "power", "value": 3.1, "unit": "W", "labels": { "domain": "core" } },
+      { "name": "power", "value": 4.2, "unit": "W", "labels": { "domain": "uncore" } },
+      { "name": "power", "value": 1.1, "unit": "W", "labels": { "domain": "dram" } }
+    ]
+  },
+  "warnings": [
+    { "module": "npu", "kind": "memory", "severity": "warning", "message": "NPU memory pressure", "since": "2026-10-25T01:24:00Z" }
+  ]
+}
