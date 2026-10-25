@@ -50,13 +50,14 @@ Panel {
   }
 
   property bool chartExpanded: boolSetting("showChart", true)
-  property bool powerExpanded: boolSetting("showPower", true)
+  property bool showPowerSection: boolSetting("showPower", true)
 
   // Card state is session-local: expanding a card should not rewrite
   // shell.json on every click.
   property bool cpuExpanded: false
   property bool gpuExpanded: false
   property bool npuExpanded: false
+  property bool powerExpanded: false
 
   // ---------------------------------------------------------- data
 
@@ -74,6 +75,13 @@ Panel {
   readonly property int tileCount: (snapshot.hasCpu ? 1 : 0) + (hasGpu ? 1 : 0) + (hasNpu ? 1 : 0)
   readonly property real tileWidth: Math.max(0,
     (panelColumn.width - Style.space(8) * Math.max(0, tileCount - 1)) / Math.max(1, tileCount))
+
+  readonly property bool hasMemory: snapshot.cpu.memoryTotal > 0
+  readonly property bool hasPower: showPowerSection &&
+    (snapshot.power.domains.length > 0 || snapshot.power.battery.capacity >= 0 || snapshot.cpu.power >= 0)
+  readonly property int secondaryTileCount: (hasMemory ? 1 : 0) + (hasPower ? 1 : 0)
+  readonly property real secondaryTileWidth: Math.max(0,
+    (panelColumn.width - Style.space(8) * Math.max(0, secondaryTileCount - 1)) / Math.max(1, secondaryTileCount))
 
   // ---------------------------------------------------------- bar
 
@@ -157,12 +165,7 @@ Panel {
     return parts.join(" · ")
   }
 
-  function sourceBadge() {
-    if (metrics.status === "offline") return "OFFLINE"
-    if (metrics.status === "starting") return "STARTING"
-    if (metrics.stale) return "STALE"
-    return "TOPSWATCH"
-  }
+
 
   function coreCount() {
     if (snapshot.cpu.cores && snapshot.cpu.cores.length > 0) return snapshot.cpu.cores.length
@@ -225,6 +228,40 @@ Panel {
     return ""
   }
 
+  function powerDomain(name) {
+    var domains = snapshot.power.domains
+    for (var i = 0; i < domains.length; i++)
+      if (domains[i].domain === name) return domains[i].watts
+    return -1
+  }
+
+  function powerTileValue() {
+    if (snapshot.cpu.power >= 0) return Model.formatWatts(snapshot.cpu.power)
+    var psys = powerDomain("psys")
+    if (psys >= 0) return Model.formatWatts(psys)
+    if (snapshot.power.battery.capacity >= 0) return snapshot.power.battery.capacity + "%"
+    return "—"
+  }
+
+  function powerTileDetail() {
+    var parts = []
+    var psys = powerDomain("psys")
+    if (psys >= 0) parts.push("psys " + Model.formatWatts(psys))
+    if (snapshot.power.battery.capacity >= 0)
+      parts.push(snapshot.power.battery.capacity + "%" +
+        (snapshot.power.battery.discharging ? " discharging" : ""))
+    return parts.length > 0 ? parts.join(" · ") : "No power data"
+  }
+
+  function powerTileMeter() {
+    return snapshot.power.battery.capacity >= 0 ? snapshot.power.battery.capacity : -1
+  }
+
+  function powerTileMeterColor() {
+    if (snapshot.power.battery.capacity >= 0 && snapshot.power.battery.capacity < 20) return urgent
+    return accent
+  }
+
   function openWebUI() {
     var command = "xdg-open " + endpoint
     if (bar && typeof bar.run === "function") bar.run(command)
@@ -241,7 +278,7 @@ Panel {
   onOpenedChanged: {
     if (opened) {
       chartExpanded = boolSetting("showChart", true)
-      powerExpanded = boolSetting("showPower", true)
+      showPowerSection = boolSetting("showPower", true)
       metrics.refresh()
       Qt.callLater(function() { keyCatcher.forceActiveFocus() })
     }
@@ -258,6 +295,7 @@ Panel {
       if (name === "cpu") root.cpuExpanded = !root.cpuExpanded
       else if (name === "gpu") root.gpuExpanded = !root.gpuExpanded
       else if (name === "npu") root.npuExpanded = !root.npuExpanded
+      else if (name === "power") root.powerExpanded = !root.powerExpanded
       return name
     }
   }
@@ -292,6 +330,7 @@ Panel {
         else if (key === "g") root.gpuExpanded = !root.gpuExpanded
         else if (key === "n") root.npuExpanded = !root.npuExpanded
         else if (key === "e") root.gpuExpanded = !root.gpuExpanded
+        else if (key === "p") root.powerExpanded = !root.powerExpanded
         else if (key === "w") root.openWebUI()
         else if (key === "b") root.launchBtop()
       }
@@ -312,7 +351,6 @@ Panel {
             width: parent.width
             title: "Hardware"
             meta: root.deviceMeta()
-            detail: root.sourceBadge()
             foreground: root.foreground
             fontFamily: root.fontFamily
             iconComponent: Component {
@@ -321,27 +359,6 @@ Panel {
                 color: root.accent
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.display
-              }
-            }
-            trailingControl: Component {
-              Row {
-                spacing: Style.space(4)
-                PanelActionButton {
-                  iconText: "󰑐"
-                  tooltipText: "Refresh (R)"
-                  foreground: root.foreground
-                  hoverColor: root.accent
-                  fontFamily: root.fontFamily
-                  onClicked: metrics.refresh()
-                }
-                PanelActionButton {
-                  iconText: "󰖟"
-                  tooltipText: "Open TopsWatch web UI (W)"
-                  foreground: root.foreground
-                  hoverColor: root.accent
-                  fontFamily: root.fontFamily
-                  onClicked: root.openWebUI()
-                }
               }
             }
           }
@@ -478,7 +495,77 @@ Panel {
             }
           }
 
-          // Expanded detail sections live below the card row and span the
+          // Memory and power use the same card language as the top row.
+          Row {
+            width: parent.width
+            spacing: Style.space(8)
+
+            GroupTile {
+              width: root.secondaryTileWidth
+              visible: root.hasMemory
+              title: "MEMORY"
+              value: root.percent(root.snapshot.cpu.memoryPercent)
+              detail: Model.formatBytes(root.snapshot.cpu.memoryUsed) + " / " +
+                Model.formatBytes(root.snapshot.cpu.memoryTotal)
+              meter: root.snapshot.cpu.memoryPercent
+              meterColor: root.levelColor(root.snapshot.cpu.memoryPercent)
+              seriesColor: root.muted
+              alarming: root.snapshot.cpu.memoryPercent >= root.criticalThreshold
+              interactive: false
+              foreground: root.foreground
+              muted: root.muted
+              urgent: root.urgent
+              accent: root.accent
+              fontFamily: root.fontFamily
+            }
+
+            GroupTile {
+              width: root.secondaryTileWidth
+              visible: root.hasPower
+              title: "POWER"
+              value: root.powerTileValue()
+              detail: root.powerTileDetail()
+              meter: root.powerTileMeter()
+              meterColor: root.powerTileMeterColor()
+              seriesColor: root.warningColor
+              expanded: root.powerExpanded
+              interactive: true
+              foreground: root.foreground
+              muted: root.muted
+              urgent: root.urgent
+              accent: root.accent
+              fontFamily: root.fontFamily
+              onToggled: root.powerExpanded = !root.powerExpanded
+            }
+          }
+
+          // The utilization graph follows the summary cards, so it stays
+          // above the expanded detail sections.
+          Column {
+            width: parent.width
+            spacing: Style.space(4)
+            visible: root.chartExpanded
+
+            SectionHeading {
+              title: "UTILIZATION"
+              value: "1 HOUR"
+            }
+
+            Item {
+              width: parent.width
+              height: Style.space(62)
+
+              Sparkline {
+                anchors.fill: parent
+                series: root.utilSeries()
+                fixedMaximum: 100
+                gridColor: root.chartGrid
+                windowMs: 3600000
+              }
+            }
+          }
+
+          // Expanded detail sections live below the summary rows and span the
           // full panel width, so their two-column grids have room to breathe.
           GroupDetail {
             width: parent.width
@@ -615,90 +702,16 @@ Panel {
             }
           }
 
-          // System RAM sits below the cards but above the graph: it is the
-          // one resource every workload shares.
-          Column {
+          GroupDetail {
             width: parent.width
-            spacing: Style.space(3)
-            visible: root.snapshot.cpu.memoryTotal > 0
-
-            Item {
-              width: parent.width
-              implicitHeight: Math.max(memoryLabel.implicitHeight, memoryValue.implicitHeight)
-
-              Text {
-                id: memoryLabel
-                text: "MEMORY"
-                textFormat: Text.PlainText
-                color: root.muted
-                font.family: root.fontFamily
-                font.pixelSize: Style.font.caption
-                font.bold: true
-                font.letterSpacing: 1.2
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-              }
-
-              Text {
-                id: memoryValue
-                text: Model.formatBytes(root.snapshot.cpu.memoryUsed) + " / " +
-                  Model.formatBytes(root.snapshot.cpu.memoryTotal) + " · " +
-                  Model.formatPercent(root.snapshot.cpu.memoryPercent, 1)
-                textFormat: Text.PlainText
-                color: root.foreground
-                font.family: root.fontFamily
-                font.pixelSize: Style.font.bodySmall
-                font.bold: true
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-              }
-            }
-
-            Meter {
-              width: parent.width
-              value: root.snapshot.cpu.memoryPercent
-              fillColor: root.levelColor(root.snapshot.cpu.memoryPercent)
-            }
-          }
-
-          // Utilization history: the 1h tier is backfilled from TopsWatch
-          // when the panel opens, then extended by the live polls. The card
-          // dots above are the legend; no separate legend is needed.
-          Column {
-            width: parent.width
-            spacing: Style.space(4)
-            visible: root.chartExpanded
-
-            SectionHeading {
-              title: "UTILIZATION"
-              value: "1 HOUR"
-            }
-
-            Item {
-              width: parent.width
-              height: Style.space(62)
-
-              Sparkline {
-                anchors.fill: parent
-                series: root.utilSeries()
-                fixedMaximum: 100
-                gridColor: root.chartGrid
-                windowMs: 3600000
-              }
-            }
-          }
-
-          // Power domains, in the same two-column rhythm as the card bodies.
-          Column {
-            width: parent.width
-            spacing: Style.space(4)
-            visible: root.powerExpanded &&
-              (root.snapshot.power.domains.length > 0 || root.snapshot.power.battery.capacity >= 0)
-
-            SectionHeading {
-              title: "POWER"
-              value: root.powerSummary()
-            }
+            visible: root.powerExpanded && root.hasPower
+            title: "POWER DETAILS"
+            seriesColor: root.warningColor
+            foreground: root.foreground
+            muted: root.muted
+            accent: root.accent
+            fontFamily: root.fontFamily
+            onToggled: root.powerExpanded = false
 
             DetailGrid {
               Repeater {

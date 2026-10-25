@@ -2,11 +2,12 @@ import QtQuick
 import qs.Commons
 import qs.Ui
 
-// Summary card in the hardware panel's three-column row.
+// Summary card used for CPU, GPU, NPU, memory, and power.
 //
 // The colored dot is the same hue as the group's line in the utilization
-// graph, so the graph no longer needs a separate legend. Clicking the card
-// toggles its full-width detail section below the row.
+// graph (or a neutral hue for memory/power, which are not charted). Clicking
+// an interactive card toggles its full-width detail section below the
+// summary rows.
 BorderSurface {
   id: tile
 
@@ -18,6 +19,7 @@ BorderSurface {
   property color seriesColor: Color.accent
   property bool alarming: false
   property bool expanded: false
+  property bool interactive: true
   property color foreground: Color.foreground
   property color muted: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.68)
   property color urgent: Color.urgent
@@ -29,7 +31,7 @@ BorderSurface {
   radius: Style.cornerRadius
   color: expanded ? Style.hoverFillFor(foreground, seriesColor) : Style.normalFillFor(foreground, Color.accent)
   borderSpec: Border.controlSpec(expanded ? "focus" : "normal", foreground, seriesColor)
-  implicitHeight: Math.max(Style.space(84), content.implicitHeight + Style.space(16))
+  implicitHeight: Math.max(Style.space(64), content.implicitHeight + Style.space(14))
   height: implicitHeight
 
   Column {
@@ -42,57 +44,57 @@ BorderSurface {
 
     Item {
       width: parent.width
-      implicitHeight: Math.max(titleRow.implicitHeight, chevron.implicitHeight)
+      implicitHeight: Math.max(titleRow.implicitHeight, valueText.implicitHeight)
 
       Row {
         id: titleRow
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Style.space(5)
+        spacing: Style.space(6)
 
-        Rectangle {
-          width: Style.space(6)
-          height: width
-          radius: width / 2
-          color: tile.seriesColor
-          opacity: tile.expanded ? 1 : 0.85
+        Item {
+          width: Style.space(7)
+          height: titleText.implicitHeight
+
+          Rectangle {
+            width: Style.space(7)
+            height: width
+            radius: width / 2
+            color: tile.seriesColor
+            opacity: tile.expanded ? 1 : 0.85
+            anchors.centerIn: parent
+          }
         }
 
         Text {
+          id: titleText
           text: tile.title
           textFormat: Text.PlainText
-          color: tile.muted
+          color: tile.foreground
           font.family: tile.fontFamily
-          font.pixelSize: Style.font.caption
+          font.pixelSize: Style.font.subtitle
           font.bold: true
-          font.letterSpacing: 1.2
+          font.letterSpacing: 0.6
         }
       }
 
       Text {
-        id: chevron
-        text: tile.expanded ? "▴" : "▾"
+        id: valueText
+        text: tile.value
         textFormat: Text.PlainText
-        color: tile.muted
+        color: tile.alarming ? tile.urgent : tile.foreground
         font.family: tile.fontFamily
-        font.pixelSize: Style.font.bodySmall
+        font.pixelSize: Style.font.title
+        font.bold: true
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
       }
     }
 
     Text {
-      text: tile.value
-      textFormat: Text.PlainText
-      color: tile.alarming ? tile.urgent : tile.foreground
-      font.family: tile.fontFamily
-      font.pixelSize: Style.font.title
-      font.bold: true
-    }
-
-    Text {
       width: parent.width
       text: tile.detail
+      visible: text !== ""
       textFormat: Text.PlainText
       color: tile.muted
       font.family: tile.fontFamily
@@ -102,6 +104,7 @@ BorderSurface {
 
     Rectangle {
       width: parent.width
+      visible: tile.meter >= 0
       height: Style.space(3)
       radius: height / 2
       color: Qt.rgba(tile.foreground.r, tile.foreground.g, tile.foreground.b, 0.12)
@@ -121,8 +124,9 @@ BorderSurface {
 
   MouseArea {
     anchors.fill: parent
-    hoverEnabled: true
-    cursorShape: Qt.PointingHandCursor
-    onClicked: tile.toggled()
+    enabled: tile.interactive
+    hoverEnabled: tile.interactive
+    cursorShape: tile.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
+    onClicked: if (tile.interactive) tile.toggled()
   }
 }

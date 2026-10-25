@@ -18,15 +18,17 @@ source can be added without touching the panel.
 | CPU | single chip icon | toggleable card with a two-column detail grid: utilization, frequency, power, temperature, cores |
 | GPU | single chip icon | toggleable card with a two-column detail grid and a two-column engine grid: render, compute, copy, video, video enhance, media clock, frequency, power, memory |
 | NPU | single chip icon | toggleable card with a two-column detail grid: frequency, power, temperature, DDR bandwidth, memory, tile config |
-| Power | package watts in tooltip | two-column RAPL domain grid and battery state |
+| Memory | — | summary card: used / total, percentage, meter |
+| Power | package watts in tooltip | toggleable summary card plus a two-column RAPL domain grid and battery state |
 | History | — | 1-hour CPU/GPU/NPU utilization chart; the card dots are the legend |
 | Health | stale/offline tooltip | TopsWatch warnings and a stale/offline banner |
 
 The bar is a single chip icon; its tooltip carries the CPU/GPU/NPU and package
 numbers. Left-click opens the panel, right-click opens the TopsWatch web UI,
-and middle-click opens btop. The three summary cards sit side by side at the
-top of the panel; clicking a card (or pressing `C`, `G`, `N`) expands its
-full-width detail section below the row.
+and middle-click opens btop. The CPU/GPU/NPU summary cards sit side by side at
+the top of the panel, followed by the memory/power cards and the 1-hour graph.
+Clicking a toggleable card (or pressing `C`, `G`, `N`, `P`) expands its
+full-width detail section below the summary rows.
 
 ## Requirements
 
@@ -115,8 +117,8 @@ full metric set.
 
 Left-click the chip icon to open or close the panel. Right-click opens the
 TopsWatch web UI; middle-click opens btop. While the panel is open, `C`, `G`,
-and `N` toggle the CPU/GPU/NPU detail sections, `E` toggles the GPU details,
-`R` refreshes, `W` opens the web UI, `B` opens btop, and `Esc` closes.
+`N`, and `P` toggle the CPU/GPU/NPU/power detail sections, `E` toggles the GPU
+details, `R` refreshes, `W` opens the web UI, `B` opens btop, and `Esc` closes.
 
 The plugin also registers its own IPC target, so a keybinding can open it
 without touching the bar:
