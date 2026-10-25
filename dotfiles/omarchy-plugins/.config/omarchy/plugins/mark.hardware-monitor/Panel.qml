@@ -100,8 +100,8 @@ Panel {
   }
 
   function barPressed(button) {
-    if (button === Qt.MiddleButton) launchBtop()
-    else if (button === Qt.RightButton) openWebUI()
+    if (button === Qt.MiddleButton) return
+    if (button === Qt.RightButton) openWebUI()
     else toggle()
   }
 

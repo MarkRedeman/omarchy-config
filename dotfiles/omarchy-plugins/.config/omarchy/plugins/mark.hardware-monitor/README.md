@@ -24,8 +24,8 @@ source can be added without touching the panel.
 | Health | stale/offline tooltip | TopsWatch warnings and a stale/offline banner |
 
 The bar is a single chip icon; its tooltip is a single line with CPU/GPU/NPU
-utilization, memory, and power. Left-click opens the panel, right-click opens
-the TopsWatch web UI, and middle-click opens btop. The CPU/GPU/NPU summary cards
+utilization, memory, and power. Left-click opens the panel and right-click
+opens the TopsWatch web UI. The CPU/GPU/NPU summary cards
 sit side by side at the top of the panel, followed by the memory/power cards
 and the 1-hour graph. Clicking a toggleable card (or pressing `C`, `G`, `N`,
 `P`) expands its full-width detail section below the summary rows.
@@ -116,9 +116,9 @@ full metric set.
 ## Use
 
 Left-click the chip icon to open or close the panel. Right-click opens the
-TopsWatch web UI; middle-click opens btop. While the panel is open, `C`, `G`,
-`N`, and `P` toggle the CPU/GPU/NPU/power detail sections, `E` toggles the GPU
-details, `R` refreshes, `W` opens the web UI, `B` opens btop, and `Esc` closes.
+TopsWatch web UI. While the panel is open, `C`, `G`, `N`, and `P` toggle the
+CPU/GPU/NPU/power detail sections, `E` toggles the GPU details, `R` refreshes,
+`W` opens the web UI, `B` opens btop, and `Esc` closes.
 
 The plugin also registers its own IPC target, so a keybinding can open it
 without touching the bar:
