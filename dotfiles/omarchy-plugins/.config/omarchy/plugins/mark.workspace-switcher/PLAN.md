@@ -68,6 +68,11 @@ enabled kind — this plugin is enabled via its bar-widget placement).
   the life of the shell session.
 - SUPER+N/P scope = focused monitor, wrap-around, existing workspaces only,
   never create/destroy.
+- Each bar surface (one per monitor) lists only the workspaces bound to that
+  monitor, so both bars stay useful at a glance. The monitor comes from the
+  widget's own bar window (`QsWindow.window.screen.name`); Wayland output
+  names match Hyprland monitor names. Widget wheel-scroll cycles that monitor
+  and anchors on its visible workspace; SUPER+N/P stay focused-monitor scoped.
 - SUPER+S lists all monitors (rows carry a monitor badge once multi-monitor);
   activating a foreign-monitor row moves focus there (native behaviour).
 
@@ -102,9 +107,10 @@ parser).
 
 ## 7. Bar widget (v1 — shipped)
 
-Occupied-or-focused workspaces of the focused monitor as plain name chips,
-v3-waybar styling: unfocused at 0.5 opacity, focused bold at full opacity.
-Click focuses; wheel up/down cycles prev/next. Logic adapted from
+Occupied-or-active workspaces of the monitor that owns the bar surface, as
+plain name chips, v3-waybar styling: inactive at 0.5 opacity, the monitor's
+visible workspace bold at full opacity. Click focuses; wheel up/down cycles
+prev/next on that same monitor. Logic adapted from
 murdialthaf/omarchy-named-workspaces (MIT).
 
 ## 8. Phase 2 (not started)

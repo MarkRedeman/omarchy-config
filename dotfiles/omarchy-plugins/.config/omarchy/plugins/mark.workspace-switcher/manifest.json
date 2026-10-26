@@ -17,7 +17,7 @@
   },
   "barWidget": {
     "displayName": "Workspace Switcher",
-    "description": "Shows only occupied/focused workspaces as name chips (v3 waybar style)",
+    "description": "Shows each bar's own monitor's occupied/active workspaces as name chips (v3 waybar style)",
     "category": "Compositor",
     "allowMultiple": false,
     "defaultSection": "left"
