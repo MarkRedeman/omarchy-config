@@ -1,0 +1,5 @@
+{
+  "ssids": ["Home Wi-Fi"],
+  "connectionNames": ["Home Ethernet"],
+  "addressPrefixes": ["192.168.1."]
+}

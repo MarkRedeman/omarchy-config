@@ -9,3 +9,7 @@ dotfiles/gnupg/.gnupg/*
 
 # Fish writes its variable store into the stowed dir (folding); never commit it
 dotfiles/fish/.config/fish/fish_variables
+
+# Machine-specific home-network identifiers for mark.idle. The live file lives
+# outside the stow tree; this is a safety net if it is ever created here.
+dotfiles/omarchy/.config/omarchy/local/

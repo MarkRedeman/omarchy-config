@@ -72,8 +72,12 @@
     "transparent": true
   },
   "idle": {
-    "lock": 960,
-    "screensaver": 900
+    "lock": 3600,
+    "screensaver": 900,
+    "away": {
+      "screensaver": 300,
+      "lock": 900
+    }
   },
   "plugins": [
     {
@@ -88,13 +92,18 @@
     },
     {
       "id": "mark.notifications"
+    },
+    {
+      "id": "mark.idle"
     }
   ],
   "version": 1,
   "disabledPlugins": [
-    "omarchy.notifications"
+    "omarchy.notifications",
+    "omarchy.idle"
   ],
   "cloneSourceRestores": [
-    "mark.notifications"
+    "mark.notifications",
+    "mark.idle"
   ]
 }
