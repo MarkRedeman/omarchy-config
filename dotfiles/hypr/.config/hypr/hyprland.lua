@@ -27,3 +27,6 @@ o.window({ tag = "default-opacity" }, { opacity = "0.985 0.96" })
 -- Make Emacs fully opaque (override the default ~98% window opacity).
 -- Emacs' window class is "Emacs"; Hyprland class regexes are case-sensitive.
 o.window("(?i)^emacs$", { tag = "-default-opacity", opacity = "1 1" })
+
+-- hyprmon: managed monitor profile include
+require("hyprmon")
