@@ -65,10 +65,110 @@ BarWidget {
     if (target) focusRecord(target)
   }
 
+  // The bar's empty space between the left modules and the centred clock is
+  // covered by Omarchy's CenterGestureArea, a full-bar MouseArea that already
+  // receives wheel events but has no wheel handler. Attach to that signal and
+  // claim only the empty left side, so presentation scrolling works in the
+  // gap while the clock and right-hand widgets keep their own wheel
+  // behaviour. Nothing is added to the scene, so clicks, hover and bar
+  // dragging behave exactly as before.
+  readonly property var barWindow: root.QsWindow ? root.QsWindow.window : null
+  property var barWheelTarget: null
+  property real centerLeftX: -1
+
+  function findCenterGestureArea(item, win) {
+    if (!item || !item.children) return null
+    for (var i = item.children.length - 1; i >= 0; i--) {
+      var child = item.children[i]
+      if (!child || !child.visible) continue
+      if (child.wheel && Math.abs(child.width - win.width) < 1
+          && Math.abs(child.height - win.height) < 1)
+        return child
+      var found = root.findCenterGestureArea(child, win)
+      if (found) return found
+    }
+    return null
+  }
+
+  // Left edge of the centred module cluster. Wheel events to its left fall in
+  // the empty presentation area; to its right belong to the clock/indicators
+  // and the right-hand widgets. The cluster sits in the middle of the bar, so
+  // modules found there are the centre ones, not the left or right section.
+  function findCenterLeftX(win) {
+    var left = win.width / 2
+    var found = false
+
+    function walk(item) {
+      if (!item || !item.children) return
+      for (var i = 0; i < item.children.length; i++) {
+        var child = item.children[i]
+        if (!child || !child.visible) continue
+        if (child.moduleName && child.width > 0) {
+          var point = child.mapToItem(win.contentItem, 0, 0)
+          if (point.x > win.width * 0.25 && point.x < win.width * 0.75
+              && (!found || point.x < left)) {
+            left = point.x
+            found = true
+          }
+        }
+        walk(child)
+      }
+    }
+
+    walk(win.contentItem)
+    return found ? left : win.width / 2
+  }
+
+  function detachBarWheel() {
+    if (barWheelTarget && barWheelTarget.wheel)
+      barWheelTarget.wheel.disconnect(root.onBarWheel)
+    barWheelTarget = null
+  }
+
+  function attachBarWheel() {
+    root.detachBarWheel()
+    var win = root.barWindow
+    var target = win ? root.findCenterGestureArea(win.contentItem, win) : null
+    if (!target || !target.wheel) return
+    root.centerLeftX = root.findCenterLeftX(win)
+    target.wheel.connect(root.onBarWheel)
+    barWheelTarget = target
+    // The centre modules may not be laid out yet when the widget first loads.
+    // Re-read their position once the current event-loop turn has settled.
+    Qt.callLater(function() {
+      if (root.barWindow === win) root.centerLeftX = root.findCenterLeftX(win)
+    })
+  }
+
+  function onBarWheel(wheel) {
+    // CenterGestureArea spans the whole bar. Only claim the empty left side;
+    // the chips have their own handler, and the clock/right widgets keep the
+    // wheel for themselves.
+    if (!root.vertical && root.centerLeftX > 0
+        && wheel.x >= root.centerLeftX - Style.spaceReal(1))
+      return
+    root.cycle(wheel.angleDelta.y > 0 ? "prev" : "next")
+  }
+
   readonly property real trailingGap: root.vertical ? 0 : Style.spaceReal(1.5)
 
   implicitWidth: row.implicitWidth + trailingGap
   implicitHeight: root.barSize
+
+  onBarWindowChanged: {
+    root.detachBarWheel()
+    Qt.callLater(root.attachBarWheel)
+  }
+
+  // The bar rebuilds its modules when the layout changes; re-find the
+  // gesture area after that instead of holding a connection to a dead item.
+  Connections {
+    target: root.bar
+    function onLayoutConfigChanged() { Qt.callLater(root.attachBarWheel) }
+  }
+
+  Component.onCompleted: Qt.callLater(root.attachBarWheel)
+  Component.onDestruction: root.detachBarWheel()
 
   WheelHandler {
     acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad

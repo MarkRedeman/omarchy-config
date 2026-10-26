@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "mark.workspace-switcher",
   "name": "Workspace Switcher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Mark Redeman",
   "license": "MIT",
   "description": "Monitor-scoped workspace cycling, a switcher panel on SUPER+S, and occupied-only name chips in the bar",

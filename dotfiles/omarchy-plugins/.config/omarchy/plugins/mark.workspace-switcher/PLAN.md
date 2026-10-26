@@ -1,8 +1,8 @@
 # mark.workspace-switcher
 
-Status: **v0.1 implemented** (2026-08-23) — bar chips, monitor-scoped cycling,
-and the workspace switcher panel are live. The window picker (Mode B) is
-deferred; see §8.
+Status: **v0.2 implemented** (2026-10-26) — bar chips, monitor-scoped cycling,
+empty-bar wheel scrolling, and the workspace switcher panel are live. The
+window picker (Mode B) is deferred; see §8.
 
 A single Omarchy shell plugin that shows occupied-only workspaces in the bar,
 owns SUPER+N/P monitor-scoped cycling, and replaces the retired walker-based
@@ -71,8 +71,9 @@ enabled kind — this plugin is enabled via its bar-widget placement).
 - Each bar surface (one per monitor) lists only the workspaces bound to that
   monitor, so both bars stay useful at a glance. The monitor comes from the
   widget's own bar window (`QsWindow.window.screen.name`); Wayland output
-  names match Hyprland monitor names. Widget wheel-scroll cycles that monitor
-  and anchors on its visible workspace; SUPER+N/P stay focused-monitor scoped.
+  names match Hyprland monitor names. Wheel-scroll over the chips or the empty
+  bar left of the centre cluster cycles that monitor and anchors on its visible
+  workspace; SUPER+N/P stay focused-monitor scoped.
 - SUPER+S lists all monitors (rows carry a monitor badge once multi-monitor);
   activating a foreign-monitor row moves focus there (native behaviour).
 
@@ -109,9 +110,17 @@ parser).
 
 Occupied-or-active workspaces of the monitor that owns the bar surface, as
 plain name chips, v3-waybar styling: inactive at 0.5 opacity, the monitor's
-visible workspace bold at full opacity. Click focuses; wheel up/down cycles
-prev/next on that same monitor. Logic adapted from
+visible workspace bold at full opacity. Click focuses; wheel up/down over the
+chips cycles prev/next on that same monitor. Logic adapted from
 murdialthaf/omarchy-named-workspaces (MIT).
+
+The bar's empty space left of the centre cluster also cycles. The widget
+connects to the wheel signal of Omarchy's full-bar `CenterGestureArea`
+MouseArea and ignores events at or right of the leftmost centre module, so
+the clock and right-hand widgets keep their own wheel behaviour. This is a
+scene-graph dependency on the built-in bar: if upstream renames or removes
+`CenterGestureArea`, chip scrolling still works and the empty-bar handler
+degrades to a no-op. Re-check `findCenterGestureArea()` after bar rewrites.
 
 ## 8. Phase 2 (not started)
 
