@@ -48,7 +48,6 @@
             },
             "omarchy.bluetooth",
             "omarchy.tailscale",
-            "omarchy.audio",
             "omarchy.monitor"
           ],
           "expandOnHover": "On",
@@ -56,6 +55,9 @@
           "chevronPosition": "left",
           "animationDuration": 300,
           "defaultExpanded": "Off"
+        },
+        {
+          "id": "omarchy.audio"
         },
         {
           "id": "omarchy.network"
