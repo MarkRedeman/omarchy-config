@@ -44,11 +44,12 @@ Start with:
 
 ```text
 dotfiles/<package>/.config/...                    Stow packages
-dotfiles/omarchy/.config/omarchy/shell.json       Bar layout + plugin entries
+dotfiles/omarchy/.config/omarchy/shell.json       Bar layout + plugin entries (tracked, not stowed)
 dotfiles/omarchy-plugins/.config/omarchy/plugins/ Quickshell plugins
 dotfiles/omarchy-plugins/.config/omarchy/plugins/<id>/PLAN.md  Plugin design notes
 scripts/deploy.sh                                 First-time setup (packages, hy3, stow)
 scripts/stow.sh                                   Re-stow every package
+scripts/shell-config.sh                           Diff/pull/push omarchy shell.json
 scripts/install-topswatch.sh                      Hardware-monitor daemon installer wrapper
 handoff-looknfeel.md                              Reproduce theme / gaps / bar
 QUATRO-MIGRATION.md                               v4 migration tracker
@@ -73,9 +74,13 @@ file before running it if the live config has changes.
 
 ### Live config is authoritative
 
-`~/.config/omarchy/shell.json` is the live shell state. The repo copy at
-`dotfiles/omarchy/.config/omarchy/shell.json` can lag behind it. Prefer the
-live-aware commands when changing the running system:
+`~/.config/omarchy/shell.json` is the live shell state. It is tracked at
+`dotfiles/omarchy/.config/omarchy/shell.json` but **not stowed**:
+`dotfiles/omarchy/.stow-local-ignore` excludes it because omarchy-shell rewrites
+it with atomic writes, which replaces a stow symlink with a regular file.
+`scripts/deploy.sh` seeds a fresh machine with the repo copy only when the live
+file is missing. Prefer the live-aware commands when changing the running
+system:
 
 ```bash
 omarchy bar set <widget-id> <key> <value>
@@ -86,8 +91,16 @@ omarchy-shell shell rescanPlugins
 omarchy-restart-shell
 ```
 
-Then reconcile the repo copy deliberately; do not assume the live file is a
-stow symlink.
+Then reconcile the repo copy deliberately instead of expecting stow to do it:
+
+```bash
+./scripts/shell-config.sh diff   # compare live and repo
+./scripts/shell-config.sh pull   # live -> repo, then review and commit
+./scripts/shell-config.sh push   # repo -> live, with a timestamped backup
+```
+
+Do not add `shell.json` back to the stow package, and do not assume the live
+file is a stow symlink.
 
 ## Quickshell plugins
 

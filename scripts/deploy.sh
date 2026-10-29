@@ -81,7 +81,31 @@ for package in "$DOTFILES_DIR"/*/; do
         stow --adopt --restow --target="$HOME" --dir="$DOTFILES_DIR" "$package_name"
     fi
 done
-git -C "$REPO_DIR" checkout -- "$DOTFILES_DIR"
+# Restore the repo versions of any adopted files, but keep uncommitted pulled
+# changes to shell.json: it is not stowed.
+git -C "$REPO_DIR" checkout -- "$DOTFILES_DIR" \
+    ":(exclude)dotfiles/omarchy/.config/omarchy/shell.json"
+
+# shell.json is tracked but intentionally not stowed: omarchy-shell rewrites it
+# with atomic writes, which replaces a symlink with a regular file. Seed it on
+# a fresh install. Afterwards the live file is authoritative; capture changes
+# with scripts/shell-config.sh pull.
+SHELL_CONFIG="$HOME/.config/omarchy/shell.json"
+if [[ -L "$SHELL_CONFIG" ]]; then
+    echo "Replacing stowed shell.json symlink with a regular file..."
+    resolved="$(readlink -f "$SHELL_CONFIG" || true)"
+    if [[ -n "$resolved" && -f "$resolved" ]]; then
+        install -m 600 "$resolved" "$SHELL_CONFIG.tmp"
+        mv -f "$SHELL_CONFIG.tmp" "$SHELL_CONFIG"
+    else
+        rm -f "$SHELL_CONFIG"
+    fi
+fi
+if [[ ! -e "$SHELL_CONFIG" ]]; then
+    echo "Seeding Omarchy shell config..."
+    mkdir -p "$(dirname "$SHELL_CONFIG")"
+    install -m 600 "$DOTFILES_DIR/omarchy/.config/omarchy/shell.json" "$SHELL_CONFIG"
+fi
 
 # Appearance state: gaps and corner radius live under ~/.local/state, so stow
 # cannot manage them. looknfeel.lua reads this file on every config load and

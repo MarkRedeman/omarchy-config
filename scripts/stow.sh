@@ -4,6 +4,10 @@ set -euo pipefail
 # Re-stow all dotfile packages to $HOME.
 # Use this after pulling changes or editing config files in the repo.
 # For first-time setup (installing packages, plugins, etc.), use deploy.sh instead.
+#
+# ~/.config/omarchy/shell.json is excluded from stow on purpose (see
+# dotfiles/omarchy/.stow-local-ignore). Use scripts/shell-config.sh pull to
+# capture live changes and push to apply the repo copy.
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOTFILES_DIR="$REPO_DIR/dotfiles"
@@ -16,7 +20,10 @@ for package in "$DOTFILES_DIR"/*/; do
     fi
 done
 
-# --adopt may have pulled live files into the repo; restore our versions
-git -C "$REPO_DIR" checkout -- "$DOTFILES_DIR"
+# --adopt may have pulled live files into the repo; restore our versions.
+# shell.json is not stowed, so keep any uncommitted pulled changes instead of
+# reverting them along with the adopted files.
+git -C "$REPO_DIR" checkout -- "$DOTFILES_DIR" \
+    ":(exclude)dotfiles/omarchy/.config/omarchy/shell.json"
 
 echo "Done. Run 'hyprctl reload' to apply Hyprland changes."

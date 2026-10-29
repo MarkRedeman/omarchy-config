@@ -18,12 +18,19 @@ workspace bar widget.
 | Theme palette | `/usr/share/omarchy/themes/<name>/colors.toml` | Upstream package |
 | Window opacity | `dotfiles/hypr/.config/hypr/hyprland.lua` | Yes |
 | Hy3 tab styling | `dotfiles/hypr/.config/hypr/plugins.lua` | Yes |
-| Shell bar layout | `dotfiles/omarchy/.config/omarchy/shell.json` | Yes |
+| Shell bar layout | `dotfiles/omarchy/.config/omarchy/shell.json` | Yes — tracked but **not stowed** |
 | Plugins | `dotfiles/omarchy-plugins/.config/omarchy/plugins/` | Yes |
 | Appearance panel | `dotfiles/omarchy-plugins/.config/omarchy/plugins/mark.appearance/` | Yes |
 
 The two state files are under `~/.local/state`, which stow does not manage.
 That is why a fresh deploy used to come up with i3-style zeros and no theme.
+
+`shell.json` is also not stowed, for a different reason: omarchy-shell rewrites
+it with atomic writes (temp file + rename), which replaces a stow symlink with a
+regular file. `scripts/deploy.sh` seeds it on a fresh machine only if the live
+file is missing; afterwards `~/.config/omarchy/shell.json` is authoritative.
+Capture changes with `scripts/shell-config.sh pull` and apply the repo copy with
+`scripts/shell-config.sh push`.
 
 ## Fully automated reproduce
 
@@ -180,21 +187,22 @@ omarchy-shell shell debugBarGeometry | jq '.[] | select(.id=="mark.workspace-swi
 `putBarWidget` is idempotent: it leaves an already-placed widget where it is.
 If the shell is not running, restart it first with `omarchy-restart-shell`.
 
-### `shell.json` is a symlink until the shell rewrites it
+### `shell.json` is tracked, not stowed
 
-`ls -l ~/.config/omarchy/shell.json` normally shows a symlink into this repo.
-After a settings change or upgrade the shell may replace it with a regular file
-(same content, different inode), which means later edits in the repo do not
-reach the live config. Re-link it with:
+`~/.config/omarchy/shell.json` is normally a regular file, not a symlink.
+omarchy-shell rewrites it with atomic writes, so even if it starts as a stow
+symlink the first bar change replaces it with a regular file. The repo copy is a
+snapshot; do not try to re-stow it:
 
 ```bash
 cd ~/projects/omarchy-config
-mv ~/.config/omarchy/shell.json /tmp/shell.json.bak
-stow --restow --target="$HOME" --dir=dotfiles omarchy
-omarchy-restart-shell
+./scripts/shell-config.sh diff   # compare live and repo
+./scripts/shell-config.sh pull   # live -> repo, then commit
+./scripts/shell-config.sh push   # repo -> live, with a timestamped backup
 ```
 
-Then restart the shell so it reads the tracked copy.
+`deploy.sh` copies the repo `shell.json` into place only when the live file is
+missing.
 
 ## Appearance panel (`mark.appearance`)
 
@@ -247,8 +255,10 @@ Expected status looks like:
 
 If `listPlugins` does not show `mark.appearance` at all, the plugin directory
 is not linked or the shell has not rescanned. If it shows `enabled: false`,
-the `plugins[]` entry is missing from `shell.json` — re-stow `omarchy` (or run
-the `enablePlugin` command above).
+the `plugins[]` entry is missing from `shell.json` — enable it with
+`omarchy plugin enable mark.appearance`, or apply the repo copy with
+`scripts/shell-config.sh push` (re-stowing `omarchy` no longer applies
+`shell.json`).
 
 ## Quick sanity check
 

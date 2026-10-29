@@ -54,6 +54,25 @@ stow --restow --target=$HOME --dir=dotfiles hypr
 
 See the `README.md` inside each package for details.
 
+## Omarchy shell config
+
+`~/.config/omarchy/shell.json` is tracked at
+`dotfiles/omarchy/.config/omarchy/shell.json` but deliberately **not** stowed.
+`omarchy-shell` rewrites it with atomic writes (temp file + rename), which
+replaces a stow symlink with a regular file. `scripts/deploy.sh` seeds it on a
+fresh install only if it is missing.
+
+Capture or apply it explicitly:
+
+```bash
+./scripts/shell-config.sh diff   # compare live and repo
+./scripts/shell-config.sh pull   # live -> repo, then commit
+./scripts/shell-config.sh push   # repo -> live (backs up the live file)
+```
+
+Use `pull` after changing the bar or idle settings with `omarchy bar ...`,
+`omarchy plugin ...`, or a bar gesture.
+
 ## Hardware Monitor plugin
 
 The `mark.hardware-monitor` bar widget shows CPU, GPU, and NPU utilization,
