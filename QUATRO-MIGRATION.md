@@ -263,8 +263,10 @@ Still open after the parity pass ([V]/[D]):
 - [V] hy3 `move_to_workspace` vs built-in `window.move`: we use the built-in
       for cross-workspace moves (matches v3 `movetoworkspace*` exactly);
       confirm behaviour under the hy3 layout at first boot
-- [D] mako's "restore last notification" has no equivalent — history panel
-      replaces it; revisit if missed
+- [x] mako's "restore last notification" — `mark.notifications` adds a
+      `restoreLast` IPC on `SUPER+SHIFT+comma` (walks back through history,
+      dunst `history-pop` style); `SUPER+SHIFT+ALT+comma` keeps the history
+      panel
 - [V] `SUPER+SPACE` kept as Omarchy menu (v3 had a tiling/floating focus
       toggle there); float toggle is on SUPER+T — revisit if missed
 

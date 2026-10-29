@@ -220,6 +220,19 @@ o.bind("SUPER + CTRL + G", "Cycle gap comfort", "omarchy-appearance-cycle")
 o.bind("SUPER + ALT + A", "Appearance settings", "omarchy-shell shell toggle mark.appearance")
 
 -- =============================================================================
+-- Notifications
+-- =============================================================================
+-- With browser toasts now expiring on their own, dismissing one at a time is
+-- rarely needed, so SUPER+comma clears the stack. The freed SUPER+SHIFT+comma
+-- restores the previously dismissed toast (dunst history-pop style).
+-- Reclaimed from quattro: SUPER+comma dismissed the last notification,
+-- SUPER+SHIFT+comma dismissed all.
+hl.unbind("SUPER + comma")
+hl.unbind("SUPER + SHIFT + comma")
+o.bind("SUPER + comma", "Dismiss all notifications", "omarchy-shell notifications dismissAll")
+o.bind("SUPER + SHIFT + comma", "Restore last notification", "omarchy-shell notifications restoreLast")
+
+-- =============================================================================
 -- Menus & system
 -- =============================================================================
 
@@ -245,5 +258,6 @@ o.bind("SHIFT + CTRL + F2", "Apple Display full brightness", "omarchy-brightness
 --                        screenshot/zoom/media clusters match v3 already
 -- * SUPER + SLASH        scaling is built-in now (up / ALT+SLASH down), which
 --                        replaces the v3 cycle script
--- * notification history replaced mako's "restore last notification"
+-- * notification history/restore: SUPER+SHIFT+ALT+comma opens the history
+--   panel, SUPER+SHIFT+comma re-shows the last dismissed toast
 -- * universal copy/paste (SUPER+C/V/X) is built-in, terminal-aware

@@ -112,23 +112,21 @@ Item {
   readonly property int normalPopupDuration: 8000
   readonly property int maxPopupDuration: 30000
 
-  function durationFor(urgency, expireTimeout) {
-    switch (urgency) {
-    case NotificationUrgency.Critical:
-      return 0
-    case NotificationUrgency.Low:
-      return Math.min(maxPopupDuration, Math.max(lowPopupDuration, requestedDuration(expireTimeout)))
-    default:
-      return Math.min(maxPopupDuration, Math.max(normalPopupDuration, requestedDuration(expireTimeout)))
-    }
-  }
+  // How many toasts may share the screen before older ones are auto-dismissed
+  // (and archived to history). Sticky alerts — native criticals and calls —
+  // are never evicted for chat traffic.
+  readonly property int maxVisiblePopups: 3
 
-  function requestedDuration(expireTimeout) {
-    // FreeDesktop notification spec (and Quickshell) report expireTimeout in
-    // milliseconds, so pass it through directly.
-    var ms = Number(expireTimeout || 0)
-    if (!isFinite(ms) || ms <= 0) return 0
-    return Math.round(ms)
+  // `sticky` is decided when the notification arrives: native critical alerts
+  // and Teams calls stay, browser chat notifications get the normal lifetime.
+  // See NotificationLogic.isStickyCritical.
+  function durationFor(urgency, expireTimeout, sticky) {
+    return NotificationLogic.popupDuration(urgency, expireTimeout, sticky, {
+      lowUrgency: NotificationUrgency.Low,
+      low: lowPopupDuration,
+      normal: normalPopupDuration,
+      max: maxPopupDuration
+    })
   }
 
   // DND bypass: only let through notifications we trust to be intentional
@@ -145,7 +143,7 @@ Item {
   }
 
   function snapshotOf(notification) {
-    return NotificationLogic.snapshotOf(notification, Date.now())
+    return NotificationLogic.snapshotOf(notification, Date.now(), NotificationUrgency.Critical)
   }
 
   // A notification nobody looks back at:
@@ -198,10 +196,14 @@ Item {
 
     persistPopupFile(snapshot)
     watchForUpdates(notification, snapshot)
+    // A fresh notification restarts the restore walk: the next
+    // SUPER+SHIFT+comma should offer this one, not resume mid-history.
+    service.restoreCursorTimestamp = 0
     // Qt.callLater avoids "QV4::Object::insertMember" crashes when a
     // Repeater is mid-incubation while we mutate its model.
     Qt.callLater(function() {
       removePopupsByOriginalId(snapshot.originalId, NotificationLogic.popupFileName(snapshot))
+      service.trimForIncoming(snapshot)
       popupModel.insert(0, snapshot)
       // An update that arrived while the insert was deferred found no row to
       // write to, and a property that already changed will not change again.
@@ -219,7 +221,7 @@ Item {
     writeHistoryFile(written, function() {
       var updated = null
       try {
-        updated = NotificationLogic.replacementSnapshot(notification, written.originalId, written.timestamp)
+        updated = NotificationLogic.replacementSnapshot(notification, written.originalId, written.timestamp, NotificationUrgency.Critical)
       } catch (e) {
         // Torn down by the server while the write was queued.
       }
@@ -247,7 +249,8 @@ Item {
   // about after the popup exists.
   readonly property var updateSignals: [
     "summaryChanged", "bodyChanged", "appNameChanged", "appIconChanged",
-    "imageChanged", "urgencyChanged", "expireTimeoutChanged", "hintsChanged"
+    "imageChanged", "urgencyChanged", "expireTimeoutChanged", "hintsChanged",
+    "actionsChanged"
   ]
 
   // A client that updates a notification through replaces_id does not produce
@@ -273,7 +276,7 @@ Item {
 
     var updated
     try {
-      updated = NotificationLogic.replacementSnapshot(notification, originalId, timestamp)
+      updated = NotificationLogic.replacementSnapshot(notification, originalId, timestamp, NotificationUrgency.Critical)
     } catch (e) {
       // Object torn down by the server while the signal was in flight.
       return
@@ -321,6 +324,42 @@ Item {
       if (NotificationLogic.popupFileName(row) !== keepFileName) deletePopupFileFor(row)
       popupModel.remove(i)
     }
+  }
+
+  // A burst from one sender (a Teams chat firing several messages in a row)
+  // should read as one toast, not a wall: a newer message replaces the older
+  // card from the same app + summary. The replaced toast is archived to
+  // history first, so SUPER+SHIFT+comma can still bring it back.
+  function coalesceForIncoming(snapshot) {
+    if (!snapshot || snapshot.sticky) return
+    for (var i = popupModel.count - 1; i >= 0; i--) {
+      var row = popupModel.get(i)
+      if (!row || row.originalId < 0 || row.sticky) continue
+      if (row.originalId === snapshot.originalId) continue
+      if (row.app === snapshot.app && row.summary === snapshot.summary) dismissPopup(i)
+    }
+  }
+
+  // Bound the on-screen stack. The oldest finite-lifetime toast goes first;
+  // sticky alerts (native criticals, calls) are kept even when that means the
+  // stack briefly exceeds the cap.
+  function trimVisiblePopups() {
+    while (popupModel.count >= maxVisiblePopups) {
+      var victim = -1
+      for (var i = popupModel.count - 1; i >= 0; i--) {
+        var row = popupModel.get(i)
+        if (!row || row.originalId < 0 || row.sticky) continue
+        victim = i
+        break
+      }
+      if (victim < 0) return
+      dismissPopup(victim)
+    }
+  }
+
+  function trimForIncoming(snapshot) {
+    coalesceForIncoming(snapshot)
+    trimVisiblePopups()
   }
 
   function dismissPopup(index) {
@@ -629,7 +668,7 @@ Item {
     onExited: service.runNextPopupFileJob()
     stdout: StdioCollector {
       waitForEnd: true
-      onStreamFinished: service.replayHistory(text)
+      onStreamFinished: service.handleHistoryRead(text)
     }
   }
 
@@ -642,6 +681,16 @@ Item {
   // showHistory while one is still waiting its turn doesn't queue another.
   property bool historyReadQueued: false
 
+  // "recent" replays the history panel, "last" pops one entry for
+  // SUPER+SHIFT+comma. The directory read is shared; only the handler differs.
+  property string historyReadMode: ""
+
+  // Timestamp of the most recently restored row. The next restore picks the
+  // newest history entry older than this, so repeated presses walk back
+  // through history instead of re-showing the same toast. A new notification
+  // resets it to 0 ("start at the newest").
+  property double restoreCursorTimestamp: 0
+
   // Re-show what's in historyDir as toasts. The read goes through the file
   // queue and its own subprocess, so the replay lands in replayHistory once
   // the work queued ahead of it has finished.
@@ -649,8 +698,25 @@ Item {
     if (readHistoryProc.running || service.historyReadQueued) return "ok"
     service.replayCarryOver = liveRowsForReplay()
     service.historyReadQueued = true
+    service.historyReadMode = "recent"
     enqueueHistoryRead()
     return "ok"
+  }
+
+  // Re-show the most recently dismissed notification, dunst history-pop style.
+  function showLastHistory() {
+    if (readHistoryProc.running || service.historyReadQueued) return "ok"
+    service.historyReadQueued = true
+    service.historyReadMode = "last"
+    enqueueHistoryRead()
+    return "ok"
+  }
+
+  function handleHistoryRead(raw) {
+    var mode = service.historyReadMode
+    service.historyReadMode = ""
+    if (mode === "last") service.replayLast(raw)
+    else service.replayHistory(raw)
   }
 
   function startHistoryRead() {
@@ -681,7 +747,8 @@ Item {
         glyph: row.glyph || "",
         execArgv: row.execArgv || "",
         urgency: row.urgency,
-        timestamp: row.timestamp
+        timestamp: row.timestamp,
+        sticky: row.sticky
       }, imagesDir).entry)
     }
     return rows
@@ -694,20 +761,7 @@ Item {
 
     // Replaying nothing at all looks like a dead keybinding, so say so.
     if (rows.length === 0) {
-      popupModel.insert(0, {
-        id: -1,
-        originalId: -1,
-        app: "omarchy-action",
-        appIcon: "",
-        summary: "No recent notifications",
-        body: "",
-        image: "",
-        glyph: "󰂚",
-        execArgv: "",
-        urgency: NotificationUrgency.Low,
-        expireTimeout: 0,
-        timestamp: Date.now()
-      })
+      service.showNoHistoryPlaceholder()
       return
     }
 
@@ -720,6 +774,80 @@ Item {
       service.restoredPopups[NotificationLogic.popupFileName(rows[i])] = true
       popupModel.append(rows[i])
     }
+  }
+
+  // An empty history replay or an exhausted restore walk explains itself with
+  // a short pseudo-toast instead of looking like a dead keybinding. One at a
+  // time: repeated presses refresh the existing placeholder rather than
+  // stacking copies.
+  function showNoHistoryPlaceholder() {
+    for (var i = 0; i < popupModel.count; i++) {
+      var row = popupModel.get(i)
+      if (row && row.originalId < 0) {
+        popupModel.remove(i)
+        break
+      }
+    }
+    popupModel.insert(0, {
+      id: -1,
+      originalId: -1,
+      app: "omarchy-action",
+      appIcon: "",
+      summary: "No recent notifications",
+      body: "",
+      image: "",
+      glyph: "󰂚",
+      execArgv: "",
+      urgency: NotificationUrgency.Low,
+      expireTimeout: 0,
+      timestamp: Date.now(),
+      sticky: false
+    })
+  }
+
+  // A row is identified across models and files by its timestamp + id. A
+  // payload object works as well as a model row, since only those two fields
+  // feed popupFileName.
+  function popupOnScreen(entry) {
+    var name = NotificationLogic.popupFileName(entry)
+    for (var i = 0; i < popupModel.count; i++) {
+      var row = popupModel.get(i)
+      if (row && NotificationLogic.popupFileName(row) === name) return true
+    }
+    return false
+  }
+
+  // Pop the newest history entry that the restore cursor has not reached yet.
+  // The history file stays where it is (a re-shown toast gets its own popup
+  // file), so it can be re-archived by name when this toast leaves the
+  // screen; the cursor is what keeps repeated presses walking backwards.
+  function replayLast(raw) {
+    var rows = NotificationLogic.historyRows(
+      raw, [], NotificationUrgency.Normal, service.historyLimit)
+    // A restored toast can still be on screen after a shell restart, when the
+    // cursor has been reset. Re-showing its history file would duplicate it.
+    var candidates = []
+    for (var i = 0; i < rows.length; i++) {
+      if (!service.popupOnScreen(rows[i])) candidates.push(rows[i])
+    }
+    var row = NotificationLogic.pickHistoryRow(candidates, service.restoreCursorTimestamp)
+    if (!row) {
+      service.showNoHistoryPlaceholder()
+      return
+    }
+
+    service.restoreCursorTimestamp = row.timestamp
+    service.restoredPopups[NotificationLogic.popupFileName(row)] = true
+
+    // A re-shown toast gets a full lifetime, persisted as an absolute
+    // deadline so a shell restart during its display judges it fairly.
+    var duration = service.durationFor(row.urgency, row.expireTimeout, row.sticky)
+    if (duration > 0) row.deadline = Date.now() + duration
+    service.persistPopupFile(row)
+    delete row.deadline
+
+    service.trimVisiblePopups()
+    popupModel.insert(0, row)
   }
 
   Process {
@@ -737,7 +865,7 @@ Item {
     var live = []
     for (var i = 0; i < entries.length; i++) {
       var entry = entries[i]
-      var duration = durationFor(entry.urgency, entry.expireTimeout)
+      var duration = durationFor(entry.urgency, entry.expireTimeout, entry.sticky)
       if (NotificationLogic.popupExpired(entry, duration, now)) {
         // It would have expired on screen had the shell kept running, so it
         // gets archived exactly like an expiry that happened while it did.
@@ -895,6 +1023,12 @@ Item {
       return service.showRecentHistory()
     }
 
+    // Re-show the most recently dismissed notification. Repeated calls walk
+    // back through history until it is exhausted.
+    function restoreLast(): string {
+      return service.showLastHistory()
+    }
+
     // `clear` forgets the recorded history; the toasts on screen stay put.
     function clear(): string {
       service.clearHistory()
@@ -1017,6 +1151,7 @@ Item {
             required property int urgency
             required property double expireTimeout
             required property double timestamp
+            required property bool sticky
 
             // Each card sizes itself based on mode (text vs media); the slot
             // tracks the card so the column auto-fits to whichever is widest.
@@ -1024,7 +1159,7 @@ Item {
             Layout.alignment: Qt.AlignRight
             implicitHeight: card.implicitHeight
 
-            readonly property real lifetime: service.durationFor(cardSlot.urgency, cardSlot.expireTimeout)
+            readonly property real lifetime: service.durationFor(cardSlot.urgency, cardSlot.expireTimeout, cardSlot.sticky)
             property real remainingLifetime: 1.0
             readonly property bool ticking: cardSlot.lifetime > 0 && !card.hovered
 

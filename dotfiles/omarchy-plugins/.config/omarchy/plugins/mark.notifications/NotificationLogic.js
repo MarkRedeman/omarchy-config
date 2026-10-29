@@ -126,6 +126,76 @@ function isEphemeralApp(appName) {
   return name === "notify-send" || name === "omarchy-action"
 }
 
+// Chromium-based browsers (and the PWAs installed from them) report web
+// notifications as urgency=critical, whether the site asked for it or not.
+// Teams chats arrive that way, so treating critical as "never expire" pins
+// every chat message to the screen until it is dismissed by hand.
+//
+// A call is the one web notification that should stay: an unanswered call
+// toast disappearing after eight seconds is worse than a sticky one. The
+// freedesktop protocol has no "call" field, so this looks at the two things
+// a call notification carries: its wording and its actions (Answer/Decline).
+function looksLikeCall(summary, body) {
+  var text = (String(summary || "") + " " + String(body || "")).toLowerCase()
+  return /\bcalling\b|\bincoming call\b|\bcall from\b/.test(text)
+}
+
+function hasCallAction(actions) {
+  var list = actions || []
+  try {
+    for (var i = 0; i < list.length; i++) {
+      var action = list[i]
+      if (!action) continue
+      var identifier = String(action.identifier || "").toLowerCase()
+      var text = String(action.text || "").toLowerCase()
+      if (/^(answer|decline|accept|reject|join)$/.test(identifier)) return true
+      if (/\b(answer|decline|accept|reject|join)\b/.test(text)) return true
+    }
+  } catch (e) {
+    // A destroyed action list reads as "no call actions".
+  }
+  return false
+}
+
+// Whether urgency=critical means "keep this on screen until dismissed".
+// Native/system senders still get the old behaviour; browser senders are
+// downgraded to a normal lifetime unless the notification is a call.
+function isStickyCritical(urgency, app, appIcon, summary, body, actions, criticalUrgency) {
+  if (urgency !== criticalUrgency) return false
+  if (!isChromiumDerived(app, appIcon)) return true
+  return looksLikeCall(summary, body) || hasCallAction(actions)
+}
+
+// The on-screen lifetime, in milliseconds. 0 means sticky (never expires).
+// `sticky` is decided when the notification arrives (see isStickyCritical)
+// and travels with the snapshot, history entry and persisted file so a
+// restored call is still sticky and a restored chat still expires.
+function popupDuration(urgency, expireTimeout, sticky, options) {
+  if (sticky) return 0
+
+  var ms = Number(expireTimeout || 0)
+  if (!isFinite(ms) || ms <= 0) ms = 0
+  else ms = Math.round(ms)
+
+  var base = urgency === options.lowUrgency ? options.low : options.normal
+  return Math.min(options.max, Math.max(base, ms))
+}
+
+// The newest history row older than the restore cursor. Rows are newest-first;
+// a cursor of 0 (or anything non-positive) means "start at the newest".
+// Returning null means the history has been walked all the way back.
+function pickHistoryRow(rows, beforeTimestamp) {
+  var list = rows || []
+  var before = Number(beforeTimestamp || 0)
+  var hasCursor = isFinite(before) && before > 0
+  for (var i = 0; i < list.length; i++) {
+    var row = list[i]
+    if (!row) continue
+    if (!hasCursor || Number(row.timestamp || 0) < before) return row
+  }
+  return null
+}
+
 function stringHint(hints, name) {
   try {
     if (hints) {
@@ -180,30 +250,34 @@ function shouldRenderCompactGlyph(glyph, iconSource, singleLineToast) {
   return String(glyph || "").length > 0 && String(iconSource || "").length === 0 && !!singleLineToast
 }
 
-function snapshotOf(notification, timestamp) {
+function snapshotOf(notification, timestamp, criticalUrgency) {
   var n = notification || {}
   var id = n.id || 0
   var expireTimeout = Number(n.expireTimeout || 0)
   if (!isFinite(expireTimeout) || expireTimeout < 0) expireTimeout = 0
+  var summary = String(n.summary || "")
+  var body = n.body || ""
   return {
     id: id,
     originalId: id,
     app: n.appName || "",
     appIcon: n.appIcon || "",
-    summary: String(n.summary || ""),
-    body: n.body || "",
+    summary: summary,
+    body: body,
     image: n.image || "",
     glyph: glyphFromHints(n.hints),
     execArgv: execArgvFromHints(n.hints),
     urgency: n.urgency,
     expireTimeout: expireTimeout,
-    timestamp: timestamp === undefined ? Date.now() : timestamp
+    timestamp: timestamp === undefined ? Date.now() : timestamp,
+    sticky: isStickyCritical(n.urgency, n.appName, n.appIcon, summary, body,
+      n.actions, criticalUrgency)
   }
 }
 
 // Everything the popup card draws, and therefore everything an in-place
 // update has to write through to the row and its file.
-var POPUP_ROLES = ["app", "appIcon", "summary", "body", "image", "glyph", "execArgv", "urgency", "expireTimeout"]
+var POPUP_ROLES = ["app", "appIcon", "summary", "body", "image", "glyph", "execArgv", "urgency", "expireTimeout", "sticky"]
 
 function popupRoles() {
   return POPUP_ROLES
@@ -227,8 +301,8 @@ function popupRowChanged(row, updated) {
 // the popup it took over: the file name is the timestamp and id the popup was
 // first persisted under, and the restore, replace and archive paths all key
 // off that name. Only what the card draws comes from the updated object.
-function replacementSnapshot(notification, originalId, timestamp) {
-  var updated = snapshotOf(notification, timestamp)
+function replacementSnapshot(notification, originalId, timestamp, criticalUrgency) {
+  var updated = snapshotOf(notification, timestamp, criticalUrgency)
   updated.id = originalId
   updated.originalId = originalId
   return updated
@@ -248,7 +322,11 @@ function historyEntry(value, normalUrgency) {
     execArgv: e.execArgv || "",
     urgency: typeof e.urgency === "number" ? e.urgency : normalUrgency,
     expireTimeout: 0,
-    timestamp: e.timestamp || 0
+    timestamp: e.timestamp || 0,
+    // Files written before sticky existed fall back to a normal lifetime.
+    // The pre-change history is dominated by browser chats, so preferring
+    // the expiry side is the safer reading of an old entry.
+    sticky: e.sticky === true
   }
 }
 
@@ -454,6 +532,11 @@ if (typeof module !== "undefined") {
     summaryStartsWithGlyph: summaryStartsWithGlyph,
     shouldBypassDnd: shouldBypassDnd,
     isEphemeralApp: isEphemeralApp,
+    looksLikeCall: looksLikeCall,
+    hasCallAction: hasCallAction,
+    isStickyCritical: isStickyCritical,
+    popupDuration: popupDuration,
+    pickHistoryRow: pickHistoryRow,
     stringHint: stringHint,
     glyphFromHints: glyphFromHints,
     execArgvFromHints: execArgvFromHints,
