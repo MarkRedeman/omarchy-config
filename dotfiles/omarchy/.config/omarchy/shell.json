@@ -14,16 +14,16 @@
           ]
         },
         {
-          "format": "dddd HH:mm",
-          "formatAlt": "d MMMM 'W'ww yyyy",
-          "id": "omarchy.clock",
-          "verticalFormat": "HH\n—\nmm"
-        },
-        {
           "id": "omarchy.keyboard-layout"
         },
         {
           "id": "omarchy.system-update"
+        },
+        {
+          "format": "dddd HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "omarchy.clock",
+          "verticalFormat": "HH\n—\nmm"
         }
       ],
       "left": [
@@ -39,22 +39,20 @@
           "id": "omarchy.agents"
         },
         {
-          "id": "mark.bar-drawer",
-          "items": [
-            "io.github.kristoferlund.webcam",
-            {
-              "id": "mark.hardware-monitor",
-              "endpoint": "http://127.0.0.1:9876"
-            },
-            "omarchy.bluetooth",
-            "omarchy.tailscale",
-            "omarchy.monitor"
-          ],
-          "expandOnHover": "On",
-          "collapseDelay": 300,
-          "chevronPosition": "left",
-          "animationDuration": 300,
-          "defaultExpanded": "Off"
+          "id": "io.github.kristoferlund.webcam"
+        },
+        {
+          "endpoint": "http://127.0.0.1:9876",
+          "id": "mark.hardware-monitor"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.tailscale"
+        },
+        {
+          "id": "omarchy.monitor"
         },
         {
           "id": "omarchy.audio"
@@ -71,24 +69,25 @@
     "position": "top",
     "transparent": true
   },
+  "cloneSourceRestores": [
+    "mark.notifications",
+    "mark.idle"
+  ],
+  "disabledPlugins": [
+    "omarchy.notifications",
+    "omarchy.idle"
+  ],
   "idle": {
-    "lock": 3600,
-    "screensaver": 900,
     "away": {
-      "screensaver": 300,
-      "lock": 900
-    }
+      "lock": 900,
+      "screensaver": 300
+    },
+    "lock": 3600,
+    "screensaver": 900
   },
   "plugins": [
     {
       "id": "mark.appearance"
-    },
-    {
-      "id": "io.github.kristoferlund.webcam"
-    },
-    {
-      "id": "mark.hardware-monitor",
-      "endpoint": "http://127.0.0.1:9876"
     },
     {
       "id": "mark.notifications"
@@ -97,13 +96,5 @@
       "id": "mark.idle"
     }
   ],
-  "version": 1,
-  "disabledPlugins": [
-    "omarchy.notifications",
-    "omarchy.idle"
-  ],
-  "cloneSourceRestores": [
-    "mark.notifications",
-    "mark.idle"
-  ]
+  "version": 1
 }
