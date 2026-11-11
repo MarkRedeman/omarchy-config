@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "mark.bar-drawer",
   "name": "Bar Drawer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Mark Redeman",
   "license": "MIT",
-  "description": "Fold secondary Omarchy bar widgets into a hover chevron drawer.",
+  "description": "Fold secondary Omarchy bar widgets and system tray icons into a hover chevron drawer.",
   "kinds": [
     "bar-widget",
     "service"
@@ -17,12 +17,13 @@
   },
   "barWidget": {
     "displayName": "Bar Drawer",
-    "description": "A chevron that reveals secondary bar widgets on hover.",
+    "description": "A chevron that reveals tray icons and secondary bar widgets on hover.",
     "category": "Appearance",
     "aliases": [
       "drawer",
       "overflow",
-      "chevron"
+      "chevron",
+      "tray"
     ],
     "defaultSection": "right",
     "allowMultiple": false,
@@ -32,9 +33,9 @@
         "mark.hardware-monitor",
         "omarchy.bluetooth",
         "omarchy.tailscale",
-        "omarchy.audio",
         "omarchy.monitor"
       ],
+      "showTrayIcons": "On",
       "defaultExpanded": "Off",
       "expandOnHover": "On",
       "collapseDelay": 300,
@@ -51,6 +52,16 @@
           "right"
         ],
         "defaultValue": "left"
+      },
+      {
+        "key": "showTrayIcons",
+        "type": "enum",
+        "label": "Show system tray icons",
+        "options": [
+          "On",
+          "Off"
+        ],
+        "defaultValue": "On"
       },
       {
         "key": "expandOnHover",

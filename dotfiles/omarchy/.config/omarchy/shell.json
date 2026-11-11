@@ -33,26 +33,25 @@
       ],
       "right": [
         {
-          "id": "omarchy.tray"
-        },
-        {
           "id": "omarchy.agents"
         },
         {
-          "id": "io.github.kristoferlund.webcam"
-        },
-        {
-          "endpoint": "http://127.0.0.1:9876",
-          "id": "mark.hardware-monitor"
-        },
-        {
-          "id": "omarchy.bluetooth"
-        },
-        {
-          "id": "omarchy.tailscale"
-        },
-        {
-          "id": "omarchy.monitor"
+          "animationDuration": 300,
+          "chevronPosition": "left",
+          "collapseDelay": 300,
+          "expandOnHover": "On",
+          "id": "mark.bar-drawer",
+          "items": [
+            "io.github.kristoferlund.webcam",
+            {
+              "endpoint": "http://127.0.0.1:9876",
+              "id": "mark.hardware-monitor"
+            },
+            "omarchy.bluetooth",
+            "omarchy.tailscale",
+            "omarchy.monitor"
+          ],
+          "showTrayIcons": "On"
         },
         {
           "id": "omarchy.audio"
@@ -94,6 +93,12 @@
     },
     {
       "id": "mark.idle"
+    },
+    {
+      "id": "io.github.kristoferlund.webcam"
+    },
+    {
+      "id": "mark.hardware-monitor"
     }
   ],
   "version": 1
